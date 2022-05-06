@@ -1,4 +1,6 @@
 using BepInEx;
+using HarmonyLib;
+using StormSurge.ScriptableObjects.TierDef;
 
 namespace StormSurge
 {
@@ -13,6 +15,9 @@ namespace StormSurge
 			instance = this;
 			Assets.Init();
 			StormSurge.Config.Init(Config);
+
+			var harm = new Harmony(Info.Metadata.GUID);
+			new PatchClassProcessor(harm, typeof(TierDefProvider)).Patch();
 		}
 	}
 }
