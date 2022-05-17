@@ -1,6 +1,7 @@
 using BepInEx;
 using HarmonyLib;
 using StormSurge.ScriptableObjects.TierDef;
+using System.Security.Permissions;
 
 namespace StormSurge
 {
