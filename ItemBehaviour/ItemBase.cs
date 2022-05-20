@@ -13,7 +13,8 @@ namespace StormSurge.ItemBehaviour
     {
         protected abstract string itemDefName { get; }
         protected abstract ItemLanguage lang { get; }
-        protected override string name => lang.nameToken.ingameText;
+        protected ItemLanguage tokens;
+        protected override string name => GetType().Name;
 
         private ItemDef _itemDef;
         protected ItemDef itemDef
@@ -29,13 +30,14 @@ namespace StormSurge.ItemBehaviour
             //if (!AddConfig()) return;
             AddConfig();
             AddItemBehaviour();
+            tokens = lang;
         }
 
         
         
         public abstract void AddItemBehaviour();
     }
-    public struct ItemLanguage
+    public class ItemLanguage
     {
         public LanguagePair nameToken;
         public LanguagePair pickupToken;

@@ -20,6 +20,10 @@ namespace StormSurge.InitialisedObjects
     public abstract class InitialisedBase
     {
         //inherited properties n methods
+        public InitialisedBase()
+        {
+            InitFunction();
+        }
         public abstract void InitFunction();
         protected PatchClassProcessor? PatchProcessor;
 
@@ -39,7 +43,7 @@ namespace StormSurge.InitialisedObjects
         public static void InitialiseAll(Harmony harmony)
         {
             Type baseType = typeof(InitialisedBase);
-            foreach (Type initType in Assembly.GetCallingAssembly().GetTypes().Where(t => t.IsAssignableFrom(baseType) && !t.IsAbstract))
+            foreach (Type initType in Assembly.GetCallingAssembly().GetTypes().Where(t => baseType.IsAssignableFrom(t) && !t.IsAbstract))
             {
                 InitialisedBase? baseInstance = Activator.CreateInstance(initType) as InitialisedBase;
                 if (harmony != null && baseInstance != null)
