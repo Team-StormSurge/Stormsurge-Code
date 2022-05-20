@@ -39,5 +39,29 @@ namespace StormSurge.ScriptableObjects.TierDef
             ColorCatalog.indexToColor32 = ColorCatalog.indexToColor32.AddItem(hunterLight).AddItem(hunterDark).ToArray();
             ColorCatalog.indexToHexString = ColorCatalog.indexToHexString.AddItem(Util.RGBToHex(hunterLight)).AddItem(Util.RGBToHex(hunterDark)).ToArray();
         }
+
+        [HarmonyPrefix, HarmonyPatch(typeof(ColorCatalog), nameof(ColorCatalog.GetColor))]
+        public static bool ReplaceGetColor(ColorCatalog.ColorIndex colorIndex, ref Color32 __result)
+        {
+            if (colorIndex < ColorCatalog.ColorIndex.None || (int) colorIndex > ColorCatalog.indexToColor32.Length)
+            {
+                colorIndex = ColorCatalog.ColorIndex.Error;
+            }
+
+            __result = ColorCatalog.indexToColor32[(int) colorIndex];
+            return false;
+        }
+        
+        [HarmonyPrefix, HarmonyPatch(typeof(ColorCatalog), nameof(ColorCatalog.GetColorHexString))]
+        public static bool ReplaceGetHexString(ColorCatalog.ColorIndex colorIndex, ref string __result)
+        {
+            if (colorIndex < ColorCatalog.ColorIndex.None || (int) colorIndex > ColorCatalog.indexToHexString.Length)
+            {
+                colorIndex = ColorCatalog.ColorIndex.Error;
+            }
+
+            __result = ColorCatalog.indexToHexString[(int) colorIndex];
+            return false;
+        }
     }
 }
