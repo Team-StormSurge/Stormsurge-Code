@@ -1,8 +1,15 @@
+using System.Security;
+using System.Security.Permissions;
 using BepInEx;
 using HarmonyLib;
 using StormSurge.ScriptableObjects.TierDef;
 using SearchableAttribute = HG.Reflection.SearchableAttribute;
 [assembly: SearchableAttribute.OptIn]
+
+#pragma warning disable CS0618 // Type or member is obsolete
+[assembly: SecurityPermission(SecurityAction.RequestMinimum, SkipVerification = true)]
+#pragma warning restore CS0618 // Type or member is obsolete
+[module: UnverifiableCode]
 
 namespace StormSurge
 {
