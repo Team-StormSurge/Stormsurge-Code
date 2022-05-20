@@ -6,21 +6,20 @@ using static StormSurge.Utils.LanguageProvider;
 
 namespace StormSurge.ItemBehaviour
 {
-    class GolemsDeadeye : BaseItemBehaviour
+    class GolemsDeadeye : ItemBase
     {
         static string prefix = "ITEM_HUNTER_" + "GOLEMEYE";
-        ItemLanguage lang = new ItemLanguage()
+        protected override ItemLanguage lang => new()
         {
             nameToken = new LanguagePair($"{prefix}_NAME", "Golem's Deadeye"),
             pickupToken = new LanguagePair($"{prefix}_PICKUP", "Gain power from consistent attacks."),
-            descToken = new LanguagePair($"{prefix}_DESC", ""),
-            loreToken = new LanguagePair($"{prefix}_LORE", ""),
+            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
+            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
         };
         protected override string itemDefName => "GolemsDeadeye";
-
-        protected override void AddItemBehaviour()
+        public override void AddItemBehaviour()
         {
-            throw new NotImplementedException();
+            UnityEngine.Debug.LogWarning("System Init Golem's Deadeye");
         }
 
     }
@@ -28,6 +27,7 @@ namespace StormSurge.ItemBehaviour
     {
 
         // LunarDetonatorPassiveAttachment passiveController;
+        ////USE BASEITEMBODYBEHAVIOUR for addcompontent-style implementation?
 
         public void OnDamageDealtServer(DamageReport damageReport)
         {

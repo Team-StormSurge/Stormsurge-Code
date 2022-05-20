@@ -7,29 +7,36 @@ namespace StormSurge.Utils
 {
     public static class LanguageProvider
     {
-        public static List<LanguagePair> LanguagePairs = new List<LanguagePair>();
+        public static Dictionary<Language,List<LanguagePair>> LanguagePairs = new();
         public class LanguagePair
         {
             public string textToken;
             public string ingameText;
             public Language tokenLanguage;
-            public LanguagePair(string token, string name, Language language = null)
+            public LanguagePair(string token, string name, Language? language = null)
             {
                 textToken = token;
                 ingameText = name;
                 tokenLanguage = language ?? Language.english;
-                LanguagePairs.Add(this);
+                LanguagePairs[tokenLanguage] ??= new List<LanguagePair>();
+                LanguagePairs[tokenLanguage].Add(this);
             }
         }
 
         [SystemInitializer]
-        public static void AddLanguagePairs()
+        public static void SubscribeForLanguage()
         {
-            foreach(LanguagePair pair in LanguagePairs)
-            {
-                pair.tokenLanguage.SetStringByToken(pair.textToken, pair.ingameText);
-            }
+            Language.onCurrentLanguageChanged += Language_onCurrentLanguageChanged;
         }
 
+        private static void Language_onCurrentLanguageChanged()
+        {
+            var currentLanguageList = LanguagePairs[Language.currentLanguage];
+            foreach(LanguagePair pair in currentLanguageList)
+            {
+                UnityEngine.Debug.LogWarning($"Pairing {pair.textToken}:{pair.ingameText} for language {Language.currentLanguageName}");
+                Language.currentLanguage.SetStringByToken(pair.textToken, pair.ingameText);
+            }
+        }
     }
 }

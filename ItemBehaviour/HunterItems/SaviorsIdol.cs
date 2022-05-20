@@ -1,37 +1,41 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using HarmonyLib;
 using RoR2;
 using static StormSurge.Utils.LanguageProvider;
 
 namespace StormSurge.ItemBehaviour
 {
-    class SaviorsIdol : BaseItemBehaviour
+    class SaviorsIdol : ItemBase
     {
         static string prefix = "ITEM_HUNTER_" + "SAVIORIDOL";
-        ItemLanguage lang = new ItemLanguage()
+        protected override ItemLanguage lang => new()
         {
             nameToken = new LanguagePair($"{prefix}_NAME", "Savior Idol"),
             pickupToken = new LanguagePair($"{prefix}_PICKUP", "In peril, find clarity."),
-            descToken = new LanguagePair($"{prefix}_DESC", ""),
-            loreToken = new LanguagePair($"{prefix}_LORE", ""),
+            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
+            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
         };
 
         protected override string itemDefName => "SaviorIdol";
-
-        protected override void AddItemBehaviour()
+        public override void AddItemBehaviour()
         {
-            On.RoR2.CharacterBody.RecalculateStats += (On.RoR2.CharacterBody.orig_RecalculateStats orig, CharacterBody self) =>
-            {
-                orig(self);
-            };
-            On.RoR2.CharacterMaster.OnInventoryChanged += (On.RoR2.CharacterMaster.orig_OnInventoryChanged orig, CharacterMaster self) =>
-            {
-                orig(self);
-                var HP = self.GetBody().healthComponent;
-                int idolLuck = (int) UnityEngine.Mathf.Max(25 - (HP.health * 100f / HP.fullHealth), 0);
-                self.luck += UnityEngine.Mathf.Min(self.inventory.GetItemCount(itemDef));
-            };
+            UnityEngine.Debug.LogWarning("System Init Savior's Idol");
+        }
+
+        [HarmonyPostfix, HarmonyPatch(typeof(CharacterBody), nameof(CharacterBody.RecalculateStats))]
+        public static void ReculateIdolEffect(CharacterBody self)
+        {
+
+        }
+        [HarmonyPostfix, HarmonyPatch(typeof(CharacterMaster), nameof(CharacterMaster.OnInventoryChanged))]
+        public static void RecalculateIdolStack(CharacterMaster self)
+        {
+            /*var HP = self.GetBody().healthComponent;
+            int idolLuck = (int)UnityEngine.Mathf.Max(25 - (HP.health * 100f / HP.fullHealth), 0);
+            self.luck += UnityEngine.Mathf.Min(self.inventory.GetItemCount(GetInstance<SaviorsIdol>()?.itemDef));*/
+            UnityEngine.Debug.LogError("Bitch you thought, this is stupid and I'm not doing it yet");
         }
     }
 }

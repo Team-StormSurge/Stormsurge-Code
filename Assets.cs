@@ -1,5 +1,6 @@
 ﻿using System.Collections;
 using System.Reflection;
+using HarmonyLib;
 using RoR2.ContentManagement;
 using StormSurge.ScriptableObjects.TierDef;
 using UnityEngine;
@@ -13,7 +14,7 @@ namespace StormSurge
 		public static ContentPack ContentPack;
 		public static string assetBundleName = "stormsurgeassets";
 		public static string contentPackName = "stormsurgecontent";
-		public static void Init()
+		public static void Init(Harmony harmony)
 		{
 			var assembly = Assembly.GetCallingAssembly();
 			var location = assembly.Location;
@@ -24,6 +25,7 @@ namespace StormSurge
 			TierDefProvider.Init(scp);
 			ContentPack = scp.CreateContentPack();
 			ContentManager.collectContentPackProviders += dele => dele(new ContentPackProvider());
+			InitialisedObjects.InitialisedBase.InitialiseAll(harmony);
 		}
 	}
 
