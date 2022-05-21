@@ -21,16 +21,16 @@ namespace StormSurge.ItemBehaviour
         protected override string itemDefName => "SaviorIdol";
         public override void AddItemBehaviour()
         {
-            UnityEngine.Debug.LogWarning("System Init Savior's Idol");
+
         }
 
         [HarmonyPostfix, HarmonyPatch(typeof(CharacterBody), nameof(CharacterBody.RecalculateStats))]
-        public static void ReculateIdolEffect(CharacterBody self)
+        public static void ReculateIdolEffect()
         {
 
         }
         [HarmonyPostfix, HarmonyPatch(typeof(CharacterMaster), nameof(CharacterMaster.OnInventoryChanged))]
-        public static void RecalculateIdolStack(CharacterMaster self)
+        public static void RecalculateIdolStack()
         {
             /*var HP = self.GetBody().healthComponent;
             int idolLuck = (int)UnityEngine.Mathf.Max(25 - (HP.health * 100f / HP.fullHealth), 0);

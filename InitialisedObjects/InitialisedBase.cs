@@ -14,9 +14,10 @@ namespace StormSurge.InitialisedObjects
 {
     public static class BaseInitialiser
     {
-        
+
 
     }
+    [HarmonyPatch]
     public abstract class InitialisedBase
     {
         //inherited properties n methods
@@ -53,7 +54,6 @@ namespace StormSurge.InitialisedObjects
                 }
                 initialisedBases.Add(baseInstance!);
                 baseDict.Add(initType, baseInstance!);
-                UnityEngine.Debug.LogWarning($"Initialising base {baseInstance}");
 
             }
         }

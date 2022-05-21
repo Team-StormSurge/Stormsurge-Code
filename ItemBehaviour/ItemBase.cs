@@ -5,10 +5,12 @@ using System.Text;
 using System.Reflection;
 using static StormSurge.Utils.LanguageProvider;
 using StormSurge.InitialisedObjects;
+using HarmonyLib;
 
 namespace StormSurge.ItemBehaviour
 {
 
+    [HarmonyPatch]
     public abstract class ItemBase : InitialisedBase
     {
         protected abstract string itemDefName { get; }

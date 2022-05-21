@@ -41,7 +41,6 @@ namespace StormSurge.Utils
             var currentLanguageList = LanguagePairs[Language.currentLanguage];
             foreach(LanguagePair pair in currentLanguageList)
             {
-                UnityEngine.Debug.LogWarning($"Pairing {pair.textToken}:{pair.ingameText} for language {Language.currentLanguageName}");
                 Language.currentLanguage.SetStringByToken(pair.textToken, pair.ingameText);
             }
         }

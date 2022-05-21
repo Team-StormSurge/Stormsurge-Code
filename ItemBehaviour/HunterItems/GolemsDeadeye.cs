@@ -19,7 +19,7 @@ namespace StormSurge.ItemBehaviour
         protected override string itemDefName => "GolemsDeadeye";
         public override void AddItemBehaviour()
         {
-            UnityEngine.Debug.LogWarning("System Init Golem's Deadeye");
+
         }
 
     }
