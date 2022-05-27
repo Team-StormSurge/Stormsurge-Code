@@ -11,6 +11,17 @@ namespace StormSurge.ItemBehaviour
 {
     class PackBond : ItemBase
     {
+        #region LoadedContent
+        static NetworkSoundEventDef? _packBondBlockSound;
+        static NetworkSoundEventDef PackBondBlockSound
+        {
+            get
+            {
+                _packBondBlockSound ??= Assets.ContentPack.networkSoundEventDefs.Find("nsePackBondBlock");
+                return _packBondBlockSound;
+            }
+        }
+        #endregion
         static string prefix = "ITEM_HUNTER_" + "PACKBOND";
         protected override ItemLanguage lang => new()
         {
@@ -26,7 +37,7 @@ namespace StormSurge.ItemBehaviour
         private ConfigEntry<float>? armorPerAlly;
         protected override bool AddConfig()
         {
-            armorPerAlly = Config.configFile!.Bind(lang.nameToken.ingameText, "Armor Stat", 5f, "The armor granted to you per ally, per stack of Pack Bond.");
+            armorPerAlly = Config.configFile!.Bind(lang.nameToken.ingameText, "Armor Stat", 5f, "The damage reduction granted to you per ally, per stack of Pack Bond.");
             return base.AddConfig();
         }
 
@@ -35,36 +46,32 @@ namespace StormSurge.ItemBehaviour
         public static void IlTakeDamage(ILContext il)
         {
             var c = new ILCursor(il);
-            c.GotoNext(MoveType.After, x => x.OpCode == OpCodes.Ldsfld && (x.Operand as FieldReference)?.Name == nameof(RoR2Content.Items.ArmorPlate),
+            c.GotoNext(MoveType.Before, x => x.MatchLdfld<HealthComponent.ItemCounts>(nameof(HealthComponent.ItemCounts.armorPlate))/*,
                 x => x.MatchCallOrCallvirt(out _),
-                x => x.MatchStloc(out _));
+                x => x.MatchStloc(out _)*/);
             var where = c.Index;
-            int num2 = -1;
-            c.GotoNext(x => x.MatchLdloc(out num2),
-                x => x.MatchLdcR4(1f),
-                x => x.MatchLdloc(out _));
+            int num = -1;
+            c.GotoNext(x => x.MatchLdloc(out num));
             c.Index = where;
-            c.Emit(OpCodes.Ldloc_1); // Body; 0 is master
-            c.Emit(OpCodes.Ldloc, num2);
-            c.EmitDelegate<Func<CharacterBody, float, float>>((body, amount) =>
+            c.Emit(OpCodes.Ldarg_0); // Body local? Emitting for delegate I think??
+            c.Emit(OpCodes.Ldloc, num);
+            c.EmitDelegate<Func<HealthComponent, float, float>>((self, amount) =>
             {
-                int allies = 0;
+                int itemCount = 0;
                 PackBond? initialised;
                 initialised = GetInstance<PackBond>();
-                foreach (CharacterMaster master in CharacterMaster.readOnlyInstancesList)
+                foreach(TeamComponent tComp in TeamComponent.GetTeamMembers(self.body.teamComponent.teamIndex))
                 {
-                    if (master.teamIndex == body.teamComponent.teamIndex &&
-                    (master.hasBody) &&
-                    (!master.playerCharacterMasterController || master.playerCharacterMasterController.isConnected))
-                        allies++;
+                    var bod = tComp.body;
+                    itemCount += bod.inventory.GetItemCount(initialised!.itemDef);
                 }
-                int itemCount = body.inventory.GetItemCount(initialised!.itemDef);
-                float damageReduc = allies * itemCount * initialised.armorPerAlly!.Value;
-                amount = UnityEngine.Mathf.Min(1f, amount - damageReduc);
-                if (itemCount > 0) UnityEngine.Debug.LogWarning($"Removing {damageReduc} damage from attack, for {itemCount} stacks and {allies} allies");
+                //int itemCount = self.body.inventory.GetItemCount(initialised!.itemDef);
+                float damageReduc = itemCount * initialised!.armorPerAlly!.Value;
+                amount = UnityEngine.Mathf.Max(1f, amount - damageReduc);
+                if(itemCount > 0) RoR2.Audio.EntitySoundManager.EmitSoundServer(PackBondBlockSound.index, self.body.gameObject);
                 return amount;
             });
-            c.Emit(OpCodes.Stloc, num2);
+            c.Emit(OpCodes.Stloc, num);
         }
     }
 }

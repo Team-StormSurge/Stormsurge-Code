@@ -23,6 +23,7 @@ namespace StormSurge.InitialisedObjects
         //inherited properties n methods
         public InitialisedBase()
         {
+            
             InitFunction();
         }
         public abstract void InitFunction();
@@ -47,13 +48,13 @@ namespace StormSurge.InitialisedObjects
             foreach (Type initType in Assembly.GetCallingAssembly().GetTypes().Where(t => baseType.IsAssignableFrom(t) && !t.IsAbstract))
             {
                 InitialisedBase? baseInstance = Activator.CreateInstance(initType) as InitialisedBase;
+                initialisedBases.Add(baseInstance!);
+                baseDict.Add(initType, baseInstance!);
                 if (harmony != null && baseInstance != null)
                 {
                     baseInstance.PatchProcessor = new PatchClassProcessor(harmony, baseInstance.GetType());
                     baseInstance.PatchProcessor.Patch();
                 }
-                initialisedBases.Add(baseInstance!);
-                baseDict.Add(initType, baseInstance!);
 
             }
         }
