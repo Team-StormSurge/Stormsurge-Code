@@ -56,7 +56,7 @@ namespace StormSurge.ItemBehaviour
             }
             else if (itemComponent)
             {
-                UnityEngine.Object.Destroy(itemComponent);
+                itemComponent.Destruct();
             }
         }
         public class SaviorIdolBehaviour : UnityEngine.MonoBehaviour
@@ -65,19 +65,27 @@ namespace StormSurge.ItemBehaviour
             public int stackCount;
             CharacterMaster? master;
             CharacterBody? body;
-            HealthComponent HP;
+            HealthComponent? HP;
 
             void Start()
             {
                 master = GetComponent<CharacterMaster>();
                 body = master.GetBody();
-                UnityEngine.Debug.LogWarning("STORMSURGE : added Savior Idol Component successfull!");
                 HP = body.healthComponent;
             }
+
+            public void Destruct()
+            {
+                master!.luck -= luckBonus;
+                Destroy(this);
+            }
+
             float oldHealth;
             void FixedUpdate()
             {
-                if (oldHealth == HP.health) return;
+                master!.luck -= luckBonus;
+
+                if (oldHealth == HP!.health) return;
 
                 oldHealth = HP.health;
                 float healthPercent = (25 - (HP.health * 100f / HP.fullHealth));
@@ -94,7 +102,8 @@ namespace StormSurge.ItemBehaviour
                 {
                     RoR2.Audio.EntitySoundManager.EmitSoundServer(SaviorEffectSound.index, __instance.gameObject);
                 }*/
-                master!.luck -= luckBonus;
+
+
                 luckBonus = finalLuck;
                 master.luck += luckBonus;
             }
