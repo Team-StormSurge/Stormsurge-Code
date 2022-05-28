@@ -26,20 +26,23 @@ namespace StormSurge.ItemBehaviour
         protected override ItemLanguage lang => new()
         {
             nameToken = new LanguagePair($"{prefix}_NAME", "Pack Bond"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "Gain protection from each ally."),
+            pickupToken = new LanguagePair($"{prefix}_PICKUP", "Grant flat damage reduction to all allies."),
             descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
             loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
         };
         protected override string itemDefName => "PackBond";
+        protected override string configName => "Pack Bond";
         public override void AddItemBehaviour()
         {}
 
+        #region Config Entries
         private ConfigEntry<float>? armorPerAlly;
         protected override bool AddConfig()
         {
-            armorPerAlly = Config.configFile!.Bind(lang.nameToken.ingameText, "Armor Stat", 5f, "The damage reduction granted to you per ally, per stack of Pack Bond.");
+            armorPerAlly = Config.configFile!.Bind(configName, "Armor Stat", 5f, "The damage reduction granted to each ally, per stack of Pack Bond.");
             return base.AddConfig();
         }
+        #endregion
 
 
         [HarmonyILManipulator, HarmonyPatch(typeof(HealthComponent), nameof(HealthComponent.TakeDamage))]

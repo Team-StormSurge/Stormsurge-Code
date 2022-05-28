@@ -16,10 +16,9 @@ namespace StormSurge.ItemBehaviour
         protected abstract string itemDefName { get; }
         protected abstract ItemLanguage lang { get; }
         protected ItemLanguage tokens;
-        protected override string name => GetType().Name;
 
         private ItemDef _itemDef;
-        protected ItemDef itemDef
+        public ItemDef itemDef
         {
             get
             {

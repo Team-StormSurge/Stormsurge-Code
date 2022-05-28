@@ -30,11 +30,11 @@ namespace StormSurge.InitialisedObjects
         protected PatchClassProcessor? PatchProcessor;
 
         //config methods
-        protected abstract string name { get; }
+        protected abstract string configName { get; }
         public ConfigEntry<bool>? Enabled;
         protected virtual bool AddConfig()
         {
-            Enabled = Config.configFile!.Bind(name, "Enabled", true, $"Whether this is enabled.");
+            Enabled = Config.configFile!.Bind(configName, "Enabled", true, $"Whether this is enabled.");
             return (Enabled.Value);
         }
 

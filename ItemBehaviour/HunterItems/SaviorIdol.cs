@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using BepInEx.Configuration;
 using HarmonyLib;
 using RoR2;
 using RoR2.Items;
@@ -8,7 +9,7 @@ using static StormSurge.Utils.LanguageProvider;
 
 namespace StormSurge.ItemBehaviour
 {
-    class SaviorsIdol : ItemBase
+    class SaviorIdol : ItemBase
     {
         #region LoadedContent
         static BuffDef? _saviorEffect;
@@ -41,6 +42,7 @@ namespace StormSurge.ItemBehaviour
         };
 
         protected override string itemDefName => "SaviorIdol";
+        protected override string configName => "Savior Idol";
         public override void AddItemBehaviour()
         {
             Inventory.onInventoryChangedGlobal += OnInvChanged;
@@ -59,6 +61,14 @@ namespace StormSurge.ItemBehaviour
                 itemComponent.Destruct();
             }
         }
+        #region Config Entries
+        public static ConfigEntry<int>? healthThreshold;
+        protected override bool AddConfig()
+        {
+            healthThreshold = Config.configFile.Bind(configName, "Health Threshold", 25, "the HP% below which Savior Idol can begin to activate.");
+            return base.AddConfig();
+        }
+        #endregion
         public class SaviorIdolBehaviour : UnityEngine.MonoBehaviour
         {
             public int luckBonus = 0;
@@ -88,9 +98,9 @@ namespace StormSurge.ItemBehaviour
                 if (oldHealth == HP!.health) return;
 
                 oldHealth = HP.health;
-                float healthPercent = (25 - (HP.health * 100f / HP.fullHealth));
+                float healthPercent = (healthThreshold!.Value - (HP.health * 100f / HP.fullHealth));
 
-                int idolLuck = (int)UnityEngine.Mathf.Ceil(UnityEngine.Mathf.Max(healthPercent * stackCount / 25f, 0));
+                int idolLuck = (int)UnityEngine.Mathf.Ceil(UnityEngine.Mathf.Max(healthPercent * stackCount / healthThreshold.Value, 0));
 
                 int finalLuck = UnityEngine.Mathf.Min(stackCount, idolLuck);
 
