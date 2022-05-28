@@ -13,7 +13,7 @@ namespace StormSurge.ScriptableObjects.TierDef
     public class TierDefProvider
     {
         private static ItemTierDef _hunter;
-        private static ItemTierDef HunterTierDef
+        public static ItemTierDef HunterTierDef
         {
             get
             {

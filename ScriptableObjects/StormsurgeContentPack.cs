@@ -11,6 +11,7 @@ namespace StormSurge
     [CreateAssetMenu(menuName = "Stormsurge/ContentPackProvider")]
     public class StormsurgeContentPack : SerializableContentPack
     {
+
         public ExpansionDef[] expansionDefs = { };
         public ItemTierDef[] itemTierDefs = { };
         public ItemRelationshipType[] itemRelationshipTypes = { };
@@ -25,6 +26,5 @@ namespace StormSurge
             content.itemRelationshipProviders.Add(itemRelationshipProviders);
             return content;
         }
-
     }
 }
