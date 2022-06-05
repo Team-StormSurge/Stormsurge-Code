@@ -8,7 +8,7 @@ using UnityEngine;
 
 namespace StormSurge
 {
-    [CreateAssetMenu(menuName = "Stormsurge/ContentPackProvider")]
+    [CreateAssetMenu(menuName = "Stormsurge/Content Pack Provider")]
     public class StormsurgeContentPack : SerializableContentPack
     {
 

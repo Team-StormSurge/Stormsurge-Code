@@ -10,6 +10,7 @@ namespace StormSurge
 {
 	public static class Assets
 	{
+		static Material[] materials;
 		public static AssetBundle AssetBundle;
 		public static ContentPack ContentPack;
 		public static string assetBundleName = "stormsurgeassets";
@@ -26,6 +27,21 @@ namespace StormSurge
 			ContentPack = scp.CreateContentPack();
 			ContentManager.collectContentPackProviders += dele => dele(new ContentPackProvider());
 			InitialisedObjects.InitialisedBase.InitialiseAll(harmony);
+			ApplyShaders();
+		}
+		public static void ApplyShaders()
+		{
+			materials = AssetBundle.LoadAllAssets<Material>();
+			var stubString = "StubbedShader";
+			foreach (Material material in materials)
+			{
+				
+				if (material.shader.name.Contains(stubString))
+                {
+					var unStubbedAddress = material.shader.name.Substring(stubString.Length).ToLower();
+					material.shader = Resources.Load<Shader>("shaders" + unStubbedAddress);
+				}
+			}
 		}
 	}
 

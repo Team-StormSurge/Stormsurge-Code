@@ -66,6 +66,7 @@ namespace StormSurge.ItemBehaviour
                 foreach(TeamComponent tComp in TeamComponent.GetTeamMembers(self.body.teamComponent.teamIndex))
                 {
                     var bod = tComp.body;
+                    if (!bod.inventory) continue;
                     itemCount += bod.inventory.GetItemCount(initialised!.itemDef);
                 }
                 //int itemCount = self.body.inventory.GetItemCount(initialised!.itemDef);
