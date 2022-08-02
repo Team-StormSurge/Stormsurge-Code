@@ -12,20 +12,15 @@ using RoR2.ContentManagement;
 
 namespace StormSurge.InitialisedObjects
 {
-    public static class BaseInitialiser
-    {
-
-
-    }
     [HarmonyPatch]
     public abstract class InitialisedBase
     {
         //inherited properties n methods
         public InitialisedBase()
         {
-            
             InitFunction();
         }
+
         public abstract void InitFunction();
         protected PatchClassProcessor? PatchProcessor;
 

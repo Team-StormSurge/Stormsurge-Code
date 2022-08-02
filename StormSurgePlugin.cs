@@ -20,7 +20,7 @@ namespace StormSurge
 	{
 		public const string MOD_GUID = "teamstormsurge.stormsurge";
 		public const string MOD_NAME = "StormSurge";
-		public const string MOD_VERSION = "0.5.0";
+		public const string MOD_VERSION = "0.5.25";
 
 		public static StormSurgePlugin? instance;
 		public static bool INSTALLED_BETTERUI;

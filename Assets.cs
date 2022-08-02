@@ -35,11 +35,12 @@ namespace StormSurge
 			var stubString = "StubbedShader";
 			foreach (Material material in materials)
 			{
-				
 				if (material.shader.name.Contains(stubString))
-                {
+				{
 					var unStubbedAddress = material.shader.name.Substring(stubString.Length).ToLower();
 					material.shader = Resources.Load<Shader>("shaders" + unStubbedAddress);
+					if (material.shader.name.ToLowerInvariant().Contains("internalerror"))
+						UnityEngine.Debug.LogWarning($"STORMSURGE : Cannot convert shader : shaders{unStubbedAddress} => {material.shader.name}");
 				}
 			}
 		}

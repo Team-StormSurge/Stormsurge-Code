@@ -49,9 +49,7 @@ namespace StormSurge.ItemBehaviour
         public static void IlTakeDamage(ILContext il)
         {
             var c = new ILCursor(il);
-            c.GotoNext(MoveType.Before, x => x.MatchLdfld<HealthComponent.ItemCounts>(nameof(HealthComponent.ItemCounts.armorPlate))/*,
-                x => x.MatchCallOrCallvirt(out _),
-                x => x.MatchStloc(out _)*/);
+            c.GotoNext(MoveType.Before, x => x.MatchLdfld<HealthComponent.ItemCounts>(nameof(HealthComponent.ItemCounts.armorPlate)));
             var where = c.Index;
             int num = -1;
             c.GotoNext(x => x.MatchLdloc(out num));
