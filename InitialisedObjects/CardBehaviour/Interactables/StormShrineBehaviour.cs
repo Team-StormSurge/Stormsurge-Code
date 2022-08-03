@@ -8,7 +8,6 @@ using RoR2.PostProcessing;
 using RoR2.PostProcess;
 using UnityEngine.Rendering.PostProcessing;
 using UnityEngine.Networking;
-using static StormSurge.Utils.LanguageProvider;
 using HarmonyLib;
 using MonoMod.Cil;
 using Mono.Cecil.Cil;
@@ -89,11 +88,8 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
                 minimumStageCompletions = 1,
             },
         };
-
-        const string PREFIX = "SS_SHRINE_STORM";
         protected override void AddCard()
         {
-            AddLanguage();
             SceneDirector.onGenerateInteractableCardSelection += (this as ISceneVariant).AddVariantToDirector;
         }
 
@@ -117,20 +113,9 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
             curs.EmitDelegate<Action<MonsterFamily>>(family =>
             {
                 StormItemsBehavior.CurrentFamilyToken = family.familySelectionChatString;
-                UnityEngine.Debug.LogWarning($"STORMSURGE :: Family selection token is {StormItemsBehavior.CurrentFamilyToken}");
+                //UnityEngine.Debug.LogWarning($"STORMSURGE :: Family selection token is {StormItemsBehavior.CurrentFamilyToken}");
             });
             //Debug.LogWarning(il);
-        }
-        void AddLanguage()
-        {
-            new LanguagePair($"{PREFIX}_NAME",$"Shrine of Storms");
-            new LanguagePair($"{PREFIX}_CONTEXT", $"Desecrate the Shrine of Storms");
-
-            new LanguagePair($"{PREFIX}_STARTRAIN", $"<style=cShrine>A totem discarded: A wicked downpour forms...</style>");
-            new LanguagePair($"{PREFIX}_STARTTAR", $"<style=cShrine>A totem discarded: The infection hungers for more...</style>");
-            new LanguagePair($"{PREFIX}_STARTASH", $"<style=cShrine>A totem discarded: Flakes and embers dance around...</style>");
-            new LanguagePair($"{PREFIX}_STARTSNOW", $"<style=cShrine>A totem discarded: Snow pelts the terrain...</style>");
-            new LanguagePair($"{PREFIX}_STARTSTARS", $"<style=cShrine>A totem discarded: Whistling lights loom close...</style>");
         }
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector dir, DirectorCardCategorySelection selection)
         {
@@ -243,7 +228,7 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
             combatDirector!.enabled = true;
             combatDirector.monsterCredit += monsterCredit;
             var combatCard = combatDirector.SelectMonsterCardForCombatShrine(monsterCredit);
-            Debug.LogWarning($"STORMSURGE:: combat card is {combatCard}, monster is {combatCard.spawnCard.prefab.name}");
+            //Debug.LogWarning($"STORMSURGE:: combat card is {combatCard}, monster is {combatCard.spawnCard.prefab.name}");
             combatDirector.OverrideCurrentMonsterCard(combatCard);
             var eDef = Assets.ContentPack.eliteDefs.Find("edStorm");
             //Debug.LogWarning($"Setting Storm elites to def {eDef}");

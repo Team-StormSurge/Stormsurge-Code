@@ -10,8 +10,6 @@ namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment
     public abstract class EquipBase : InitialisedBase
     {
         protected abstract string equipDefName { get; }
-        protected abstract ItemLanguage lang { get; }
-        protected ItemLanguage? tokens;
 
         private EquipmentDef _equipDef;
         public EquipmentDef equipDef
@@ -27,7 +25,6 @@ namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment
             //if (!AddConfig()) return;
             AddConfig();
             AddEquipBehavior();
-            tokens = lang;
         }
         public abstract void AddEquipBehavior();
     }

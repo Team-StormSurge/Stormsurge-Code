@@ -1,0 +1,10 @@
+{
+	"strings":
+	{
+		"SS_SHRINE_STORM_STARTRAIN" : "<style=cShrine>A totem discarded: A wicked downpour forms...</style>",
+        "SS_SHRINE_STORM_STARTTAR" : "<style=cShrine>A totem discarded: The infection hungers for more...</style>",
+        "SS_SHRINE_STORM_STARTASH" : "<style=cShrine>A totem discarded: Flakes and embers dance around...</style>",
+        "SS_SHRINE_STORM_STARTSNOW" : "<style=cShrine>A totem discarded: Snow pelts the terrain...</style>",
+        "SS_SHRINE_STORM_STARTSTARS" : "<style=cShrine>A totem discarded: Whistling lights loom close...</style>"
+	}
+}

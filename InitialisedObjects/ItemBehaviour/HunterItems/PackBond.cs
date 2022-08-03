@@ -5,7 +5,6 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
-using static StormSurge.Utils.LanguageProvider;
 
 namespace StormSurge.ItemBehaviour
 {
@@ -22,14 +21,6 @@ namespace StormSurge.ItemBehaviour
             }
         }
         #endregion
-        static string prefix = "ITEM_HUNTER_" + "PACKBOND";
-        protected override ItemLanguage lang => new()
-        {
-            nameToken = new LanguagePair($"{prefix}_NAME", "Pack Bond"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "Grant flat damage reduction to all allies."),
-            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
-            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
-        };
         protected override string itemDefName => "PackBond";
         protected override string configName => "Pack Bond";
         public override void AddItemBehaviour()

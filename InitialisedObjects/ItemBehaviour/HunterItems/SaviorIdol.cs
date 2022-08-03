@@ -5,7 +5,6 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using RoR2;
 using RoR2.Items;
-using static StormSurge.Utils.LanguageProvider;
 
 namespace StormSurge.ItemBehaviour
 {
@@ -32,14 +31,6 @@ namespace StormSurge.ItemBehaviour
             }
         }
         #endregion
-        static string prefix = "ITEM_HUNTER_" + "SAVIORIDOL";
-        protected override ItemLanguage lang => new()
-        {
-            nameToken = new LanguagePair($"{prefix}_NAME", "Savior Idol"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "In peril, find clarity."),
-            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
-            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
-        };
 
         protected override string itemDefName => "SaviorIdol";
         protected override string configName => "Savior Idol";

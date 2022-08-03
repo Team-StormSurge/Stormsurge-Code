@@ -6,7 +6,6 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
-using static StormSurge.Utils.LanguageProvider;
 
 namespace StormSurge.ItemBehaviour
 {
@@ -33,14 +32,6 @@ namespace StormSurge.ItemBehaviour
             }
         }
         #endregion
-        static string prefix = "ITEM_HUNTER_" + "GOLEMEYE";
-        protected override ItemLanguage lang => new()
-        {
-            nameToken = new LanguagePair($"{prefix}_NAME", "Golem's Deadeye"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "Gain power from consistent attacks."),
-            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
-            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
-        };
         protected override string itemDefName => "GolemsDeadeye";
         protected override string configName => "Golem Deadeye";
         public override void AddItemBehaviour()

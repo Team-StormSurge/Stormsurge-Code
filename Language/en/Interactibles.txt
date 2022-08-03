@@ -1,0 +1,7 @@
+{
+	"strings":
+	{
+        "SS_SHRINE_STORM_NAME" : "Shrine of Storms",
+        "SS_SHRINE_STORM_CONTEXT" : "Desecrate the Shrine of Storms"
+	}
+}

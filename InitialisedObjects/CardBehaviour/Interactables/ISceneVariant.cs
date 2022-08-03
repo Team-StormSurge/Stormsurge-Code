@@ -28,7 +28,7 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
             if (gotValue)
             {
                 int ind = Array.FindIndex(selection.categories, (item) => item.name.Equals(cardCategory, StringComparison.OrdinalIgnoreCase));
-                UnityEngine.Debug.LogWarning($"STORMSURGE : added shrine {dCard.spawnCard.name} to stage {SceneInfo.instance.sceneDef.nameToken}");
+                //UnityEngine.Debug.LogWarning($"STORMSURGE : added shrine {dCard.spawnCard.name} to stage {SceneInfo.instance.sceneDef.nameToken}");
                 selection.AddCard(ind, dCard);
             }
 

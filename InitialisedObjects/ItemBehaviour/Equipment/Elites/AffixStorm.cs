@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Text;
-using static StormSurge.Utils.LanguageProvider;
 using HarmonyLib;
 using RoR2;
 using UnityEngine;
@@ -19,16 +18,6 @@ namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment.Elites
     public class AffixStorm : EquipBase
     {
         protected override string equipDefName => "EliteStormEquipment";
-
-        static string prefix = "SS_AFFIX_" + "STORM";
-        protected override ItemLanguage lang => new()
-        {
-            nameToken = new($"{prefix}_NAME", "Overlord's Descent"),
-            pickupToken = new($"{prefix}_PICKUP", "Become an aspect of Maelstrom."),
-            descToken = new($"{prefix}_DESC", "placeholder"),
-            loreToken = new($"{prefix}_LORE", "placeholder")
-        };
-        LanguagePair modifierToken = new($"{prefix}_MODIFIER", "Storming");
         protected override string configName => "Storming Aspect";
 
         public override void AddEquipBehavior(){ }
@@ -87,7 +76,7 @@ namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment.Elites
                 body = GetComponent<CharacterBody>();
                 stuporInstance = Instantiate(stuporWard, gameObject.transform);
                 stuporInstance!.GetComponent<TeamFilter>().teamIndex = body.teamComponent.teamIndex;
-                Debug.LogWarning($"STORMSURGE :: instantiated {stuporInstance}");
+                //Debug.LogWarning($"STORMSURGE :: instantiated {stuporInstance}");
                 lightningRoutine = StartCoroutine(TickLightning(duration));
             }
             void OnDestroy()
