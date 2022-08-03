@@ -50,6 +50,7 @@ namespace StormSurge.ItemBehaviour
 
         private void OnInvChanged(Inventory inv)
         {
+            if (!inv.GetComponent<CharacterMaster>()) return;
             var itemComponent = inv.GetComponent<SaviorIdolBehaviour>();
             if (inv.GetItemCount(itemDef) > 0)
             {
@@ -79,7 +80,8 @@ namespace StormSurge.ItemBehaviour
 
             void Start()
             {
-                master = GetComponent<CharacterMaster>();
+                master = GetComponentInChildren<CharacterMaster>();
+                //UnityEngine.Debug.LogWarning($"STORMSURGE :: {name} HAS COMPONENT {master}");
                 body = master.GetBody();
                 HP = body.healthComponent;
             }
@@ -93,9 +95,10 @@ namespace StormSurge.ItemBehaviour
             float oldHealth;
             void FixedUpdate()
             {
-                master!.luck -= luckBonus;
 
                 if (oldHealth == HP!.health) return;
+
+                master!.luck -= luckBonus;
 
                 oldHealth = HP.health;
                 float healthPercent = (healthThreshold!.Value - (HP.health * 100f / HP.fullHealth));

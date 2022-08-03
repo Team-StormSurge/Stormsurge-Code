@@ -97,6 +97,12 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
             SceneDirector.onGenerateInteractableCardSelection += (this as ISceneVariant).AddVariantToDirector;
         }
 
+        [HarmonyPostfix, HarmonyPatch(typeof(BossGroup),nameof(BossGroup.UpdateObservations))]
+        public static void overrideSubtitle(BossGroup __instance, BossGroup.BossMemory memory)
+        {
+            string cloud = "< sprite name =\"CloudLeft\" tint=1>";
+            __instance.bestObservedSubtitle = $"{cloud} {StormItemsBehavior.FindSubtitle()} {cloud}";
+        }
         static TypeReference tRef;
         [HarmonyILManipulator, HarmonyPatch(typeof(ClassicStageInfo), nameof(ClassicStageInfo.RebuildCards))]
         public static void IlRebuildCards(ILContext il)
@@ -119,11 +125,12 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
         {
             new LanguagePair($"{PREFIX}_NAME",$"Shrine of Storms");
             new LanguagePair($"{PREFIX}_CONTEXT", $"Desecrate the Shrine of Storms");
-            new LanguagePair($"{PREFIX}_STARTRAIN", $"<style=cShrine>Wicked rain sweeps in...</style>");
-            new LanguagePair($"{PREFIX}_STARTTAR", $"<style=cShrine>Vile tar condenses from nothing...</style>");
-            new LanguagePair($"{PREFIX}_STARTASH", $"<style=cShrine>Volcanic ash spews from below...</style>");
-            new LanguagePair($"{PREFIX}_STARTSNOW", $"<style=cShrine>Freezing snow fills the air...</style>");
-            new LanguagePair($"{PREFIX}_STARTSTARS", $"<style=cShrine>Stars whistle through the sky...</style>");
+
+            new LanguagePair($"{PREFIX}_STARTRAIN", $"<style=cShrine>A totem discarded: A wicked downpour forms...</style>");
+            new LanguagePair($"{PREFIX}_STARTTAR", $"<style=cShrine>A totem discarded: The infection hungers for more...</style>");
+            new LanguagePair($"{PREFIX}_STARTASH", $"<style=cShrine>A totem discarded: Flakes and embers dance around...</style>");
+            new LanguagePair($"{PREFIX}_STARTSNOW", $"<style=cShrine>A totem discarded: Snow pelts the terrain...</style>");
+            new LanguagePair($"{PREFIX}_STARTSTARS", $"<style=cShrine>A totem discarded: Whistling lights loom close...</style>");
         }
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector dir, DirectorCardCategorySelection selection)
         {
@@ -190,7 +197,7 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
         }
         void AddStormWetGround()
         {
-            Debug.LogWarning($"STORMSURGE [WET GROUND] not yet been implemented!");
+            Debug.LogWarning($"STORMSURGE [WET GROUND] not been implemented!");
         }
         void AddStormWind()
         {
@@ -206,7 +213,7 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
             var rainPP = Instantiate(stormEvent?.postProcessingVolume);
             rainPP.GetComponent<PostProcessVolume>().priority = ppVolume.priority + 1;
             NetworkServer.Spawn(rainPP);
-            Debug.LogWarning($"STORMSURGE: post process has original priority of {ppVolume.priority}");
+            //Debug.LogWarning($"STORMSURGE: post process has original priority of {ppVolume.priority}");
         }
         void ForceFamilyEvent()
         {

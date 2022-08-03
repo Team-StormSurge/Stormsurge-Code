@@ -20,15 +20,15 @@ namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment.Elites
     {
         protected override string equipDefName => "EliteStormEquipment";
 
-        static string prefix = "AFFIX_HUNTER_" + "STORM";
+        static string prefix = "SS_AFFIX_" + "STORM";
         protected override ItemLanguage lang => new()
         {
-            nameToken = new LanguagePair($"{prefix}_NAME", "Overlord's Descent"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "Become an aspect of Maelstrom."),
-            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
-            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
+            nameToken = new($"{prefix}_NAME", "Overlord's Descent"),
+            pickupToken = new($"{prefix}_PICKUP", "Become an aspect of Maelstrom."),
+            descToken = new($"{prefix}_DESC", "placeholder"),
+            loreToken = new($"{prefix}_LORE", "placeholder")
         };
-
+        LanguagePair modifierToken = new($"{prefix}_MODIFIER", "Storming");
         protected override string configName => "Storming Aspect";
 
         public override void AddEquipBehavior(){ }
@@ -53,6 +53,25 @@ namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment.Elites
             UnityEngine.Object.Destroy(__instance.gameObject.GetComponent<StormAffixComponent>());
 
         }
+
+        private static BuffDef _stuporBuff;
+        static BuffDef StuporBuff
+        {
+            get
+            {
+                _stuporBuff ??= Assets.ContentPack.buffDefs.Find("stupor");
+                return _stuporBuff;
+            }
+        }
+        [HarmonyPostfix, HarmonyPatch(typeof(CharacterBody), nameof(CharacterBody.RecalculateStats))]
+        public static void StuporBuffPatch(CharacterBody __instance)
+        {
+            if(__instance.HasBuff(StuporBuff))
+            {
+                __instance.damage *= Mathf.Min((1 - (0.05f * __instance.GetBuffCount(StuporBuff))),0.7f);
+                __instance.sprintingSpeedMultiplier *= Mathf.Min((1 - (0.05f * __instance.GetBuffCount(StuporBuff))),0.7f);
+            }
+        }
         public class StormAffixComponent : MonoBehaviour
         {
             private readonly BullseyeSearch search = new BullseyeSearch();
@@ -67,6 +86,8 @@ namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment.Elites
             {
                 body = GetComponent<CharacterBody>();
                 stuporInstance = Instantiate(stuporWard, gameObject.transform);
+                stuporInstance!.GetComponent<TeamFilter>().teamIndex = body.teamComponent.teamIndex;
+                Debug.LogWarning($"STORMSURGE :: instantiated {stuporInstance}");
                 lightningRoutine = StartCoroutine(TickLightning(duration));
             }
             void OnDestroy()

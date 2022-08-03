@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.IO;
 using System.Reflection;
 using HarmonyLib;
 using RoR2.ContentManagement;
@@ -19,8 +20,9 @@ namespace StormSurge
 		{
 			var assembly = Assembly.GetCallingAssembly();
 			var location = assembly.Location;
-			AssetBundle = AssetBundle.LoadFromFile(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(location), assetBundleName));
-			
+			AssetBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(location), assetBundleName));
+			RoR2.Language.collectLanguageRootFolders += list => list.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Language");
+
 			// Load serializable contentpack and supply to content manager
 			var scp = AssetBundle.LoadAsset<StormsurgeContentPack>(contentPackName);
 			TierDefProvider.Init(scp);

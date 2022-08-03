@@ -43,6 +43,7 @@ namespace StormSurge
 			Assets.Init(harmony);
 
 			new PatchClassProcessor(harmony, typeof(TierDefProvider)).Patch();
+
 		}
 	}
 }
