@@ -13,6 +13,7 @@ using MonoMod.Cil;
 using Mono.Cecil.Cil;
 using static RoR2.ClassicStageInfo;
 using Mono.Cecil;
+using StormSurge.Utils;
 
 namespace StormSurge.Interactables
 {
@@ -119,7 +120,7 @@ namespace StormSurge.Interactables
         public static bool FindSubtitle(out string result)
         {
             result = "";
-            var success = subtitles.TryGetValue(StormItemsBehavior.CurrentFamilyToken, out result);
+            var success = subtitles.TryGetValue(StormItemsBehavior.CurrentFamily.familySelectionChatString, out result);
             //Debug.LogWarning($"Current family token is {CurrentFamilyToken}; Success = {success}; result is {result}; final value is {final}");
             if (success)
             {
@@ -147,24 +148,14 @@ namespace StormSurge.Interactables
             curs.GotoNext(MoveType.Before, x => x.MatchCallvirt(AccessTools.DeclaredPropertyGetter(typeof(CharacterBody), 
                 nameof(CharacterBody.healthComponent))));
 
-            curs.GotoPrev(x => x.MatchCall(AccessTools.DeclaredPropertyGetter(typeof(BossGroup), 
+            curs.GotoPrev(MoveType.After, x => x.MatchCall(AccessTools.DeclaredPropertyGetter(typeof(BossGroup), 
                 nameof(BossGroup.bestObservedSubtitle))));
-            var oldOp = curs.Next.Operand;
+            //var oldOp = curs.Next.Operand;
             curs.Emit(OpCodes.Ldarg_0);
-            curs.Emit(OpCodes.Call,oldOp);
-            Type sType = typeof(string);
-            TypeReference tRef = AssemblyDefinition.ReadAssembly(sType.Assembly.Location).MainModule.ImportReference(sType).Resolve();
+            //curs.Emit(OpCodes.Call,oldOp);
             var method = typeof(StormShrineBase).GetMethod(nameof(SubtitleReplace));
-            var mRef = new MethodReference($"{method.Name}", tRef);
-            foreach(System.Reflection.ParameterInfo param in method.GetParameters())
-            {
-                var pType = param.ParameterType;
-                var pTypeDef = AssemblyDefinition.ReadAssembly(pType.Assembly.Location).MainModule.ImportReference(pType).Resolve();
-                mRef.Parameters.Add(new ParameterDefinition(pTypeDef));
-            }
-            var dType = method.DeclaringType;
-            mRef.DeclaringType = AssemblyDefinition.ReadAssembly(dType.Assembly.Location).MainModule.ImportReference(dType);
-            curs.Next.Operand = mRef;
+            var mRef = method.GenerateReference();
+            curs.Emit(OpCodes.Call, mRef); // was curs.Next.Operand = mRef;
 
 
             //Debug.LogWarning($"\n{il}");
@@ -182,7 +173,7 @@ namespace StormSurge.Interactables
             curs.Emit(OpCodes.Ldloc, i);
             curs.EmitDelegate<Action<MonsterFamily>>(family =>
             {
-                StormItemsBehavior.CurrentFamilyToken = family.familySelectionChatString;
+                StormItemsBehavior.CurrentFamily = family;
                 //UnityEngine.Debug.LogWarning($"STORMSURGE :: Family selection token is {StormItemsBehavior.CurrentFamilyToken}");
             });
             //Debug.LogWarning(il);

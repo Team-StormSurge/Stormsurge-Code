@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using static RoR2.ClassicStageInfo;
 using static StormSurge.Equipment.Elites.AffixStorm;
 
 namespace StormSurge.Interactables
@@ -28,7 +29,7 @@ namespace StormSurge.Interactables
             var gObj = Instantiate(NetworkedInventoryPrefab);
             gObj.GetComponent<EnemyInfoPanelInventoryProvider>().enabled = true;
             StormItemInventory = gObj.GetComponent<Inventory>();
-            dropTable = FamilyPools.TryGetValue(CurrentFamilyToken, out dropTable) ? dropTable : FamilyPools["default"];
+            dropTable = FamilyPools.TryGetValue(CurrentFamily.familySelectionChatString, out dropTable) ? dropTable : FamilyPools["default"];
             foreach(var entry in dropTable.pickupEntries)
             {
                 if (entry.pickupDef is ItemDef)
@@ -63,7 +64,7 @@ namespace StormSurge.Interactables
         {
             SpawnCard.onSpawnedServerGlobal -= SpawnHunterEnemy;
             GlobalEventManager.onCharacterDeathGlobal -= CheckStormingItem;
-            CurrentFamilyToken = "";
+            CurrentFamily = default;
             Destroy(StormItemInventory!.gameObject);
         }
 
@@ -97,7 +98,7 @@ namespace StormSurge.Interactables
             public string key;
             public ExplicitPickupDropTable table;
         }
-        public static string CurrentFamilyToken = "";
+        public static MonsterFamily CurrentFamily;
         private static GameObject? _networkedInventoryPrefab;
         private static GameObject NetworkedInventoryPrefab
         {
