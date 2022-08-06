@@ -10,7 +10,7 @@ using HarmonyLib;
 using RoR2;
 using RoR2.ContentManagement;
 
-namespace StormSurge.InitialisedObjects
+namespace StormSurge
 {
     [HarmonyPatch]
     public abstract class InitialisedBase

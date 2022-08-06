@@ -28,7 +28,7 @@ namespace StormSurge
 			TierDefProvider.Init(scp);
 			ContentPack = scp.CreateContentPack();
 			ContentManager.collectContentPackProviders += dele => dele(new ContentPackProvider());
-			InitialisedObjects.InitialisedBase.InitialiseAll(harmony);
+			InitialisedBase.InitialiseAll(harmony);
 			ApplyShaders();
 		}
 		public static void ApplyShaders()

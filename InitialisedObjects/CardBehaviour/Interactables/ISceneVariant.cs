@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
+namespace StormSurge.Interactables
 {
     public interface ISceneVariant
     {

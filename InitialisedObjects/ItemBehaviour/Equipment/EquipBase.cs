@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment
+namespace StormSurge.Equipment
 {
     [HarmonyLib.HarmonyPatch]
     public abstract class EquipBase : InitialisedBase

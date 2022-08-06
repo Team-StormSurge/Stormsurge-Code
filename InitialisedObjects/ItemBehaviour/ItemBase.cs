@@ -3,10 +3,9 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 using System.Reflection;
-using StormSurge.InitialisedObjects;
 using HarmonyLib;
 
-namespace StormSurge.ItemBehaviour
+namespace StormSurge
 {
 
     [HarmonyPatch]

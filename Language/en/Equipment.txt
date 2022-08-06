@@ -5,6 +5,6 @@
         "SS_AFFIX_STORM_PICKUP" : "Become an aspect of Maelstrom.",
         "SS_AFFIX_STORM_DESC" : "placeholder",
         "SS_AFFIX_STORM_LORE" : "placeholder",
-        "SS_AFFIX_STORM_MODIFIER" : "Storming"
+        "SS_AFFIX_STORM_MODIFIER" : "Storming {0}"
 	}
 }

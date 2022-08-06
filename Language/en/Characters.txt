@@ -1,6 +1,18 @@
 {
 	"strings":
 	{
-		
+		"SS_SUBTITLE_GOLEMFAMILY" : "Conudit in Stone",
+        "SS_SUBTITLE_JELLYFAMILY" : "Charged Medusa",
+        "SS_SUBTITLE_WISPFAMILY" : "Thunderous Spirit",
+        "SS_SUBTITLE_BEETLEFAMILY" : "Drowned Hive",
+        "SS_SUBTITLE_IMPFAMILY" : "Scarlet Usurper",
+        "SS_SUBTITLE_LEMFAMILY" : "Shaman of Lightning",
+        "SS_SUBTITLE_PARENTFAMILY" : "Young Star's Fury",
+        "SS_SUBTITLE_MUSHRUMFAMILY" : "Infecting Pests",
+        "SS_SUBTITLE_LUNARFAMILY" : "Elegy of Rage",
+		"SS_SUBTITLE_LARVAFAMILY" : "Corrosive Parasite",
+		"SS_SUBTITLE_GUPFAMILY" : "Static Friend",
+		"SS_SUBTITLE_CONSTRUCTFAMILY" : "Spark Nexus",
+		"SS_SUBTITLE_VOIDFAMILY" : "Astrapomantic Invader",
 	}
 }

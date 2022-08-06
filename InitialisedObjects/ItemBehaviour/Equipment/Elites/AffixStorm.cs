@@ -12,7 +12,7 @@ using UnityEngine.Networking;
 using RoR2.Projectile;
 using UnityEngine.AddressableAssets;
 
-namespace StormSurge.InitialisedObjects.ItemBehaviour.Equipment.Elites
+namespace StormSurge.Equipment.Elites
 {
     [HarmonyPatch]
     public class AffixStorm : EquipBase

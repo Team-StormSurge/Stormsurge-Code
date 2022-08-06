@@ -7,9 +7,9 @@ using System.Collections.Generic;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
-using static StormSurge.InitialisedObjects.ItemBehaviour.Equipment.Elites.AffixStorm;
+using static StormSurge.Equipment.Elites.AffixStorm;
 
-namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
+namespace StormSurge.Interactables
 {
     public class StormItemsBehavior : NetworkBehaviour
     {
@@ -63,32 +63,10 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
         {
             SpawnCard.onSpawnedServerGlobal -= SpawnHunterEnemy;
             GlobalEventManager.onCharacterDeathGlobal -= CheckStormingItem;
+            CurrentFamilyToken = "";
             Destroy(StormItemInventory!.gameObject);
         }
 
-        static Dictionary<string, string> subtitles = new()
-        {
-            ["FAMILY_GOLEM"]        =      "SS_SUBTITLE_GOLEMFAMILY",
-            ["FAMILY_JELLYFISH"]    =   "SS_SUBTITLE_JELLYFAMILY",
-            ["FAMILY_WISP"]         =       "SS_SUBTITLE_WISPFAMILY",
-            ["FAMILY_BEETLE"]       =     "SS_SUBTITLE_BEETLEFAMILY",
-            ["FAMILY_IMP"]          =        "SS_SUBTITLE_IMPFAMILY",
-            ["FAMILY_LEMURIAN"]     =   "SS_SUBTITLE_LEMFAMILY",
-            ["FAMILY_PARENT"]       =     "SS_SUBTITLE_PARENTFAMILY",
-            ["FAMILY_MUSHRUM"]      =    "SS_SUBTITLE_MUSHRUMFAMILY",
-            ["FAMILY_LUNAR"]        =      "SS_SUBTITLE_LUNARFAMILY",
-            ["FAMILY_ACIDLARVA"]    =  "SS_SUBTITLE_LARVAFAMILY",
-            ["FAMILY_GUP"]          =        "SS_SUBTITLE_GUPFAMILY",
-            ["FAMILY_CONSTRUCT"]    =  "SS_SUBTITLE_CONSTRUCTFAMILY",
-            ["FAMILY_VOID"]         =       "SS_SUBTITLE_VOIDFAMILY",
-
-        };
-        public static string FindSubtitle()
-        {
-            string result;
-            var success = subtitles.TryGetValue(CurrentFamilyToken, out result);
-            return Language.GetString(success ? result : "NULL_SUBTITLE");
-        }
         private static void CheckStormingItem(DamageReport damageReport)
         {
             if (!damageReport.victimMaster) return;
@@ -119,7 +97,7 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
             public string key;
             public ExplicitPickupDropTable table;
         }
-        public static string CurrentFamilyToken;
+        public static string CurrentFamilyToken = "";
         private static GameObject? _networkedInventoryPrefab;
         private static GameObject NetworkedInventoryPrefab
         {
@@ -131,6 +109,5 @@ namespace StormSurge.InitialisedObjects.CardBehaviour.Interactables
             }
         }
         private static Inventory? StormItemInventory;
-        private static int currentItemIterator = 0;
     }
 }
