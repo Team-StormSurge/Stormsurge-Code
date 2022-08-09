@@ -14,6 +14,8 @@ using Mono.Cecil.Cil;
 using static RoR2.ClassicStageInfo;
 using Mono.Cecil;
 using StormSurge.Utils;
+using static RoR2.DirectorCardCategorySelection;
+using static RoR2.BossGroup;
 
 namespace StormSurge.Interactables
 {
@@ -47,7 +49,7 @@ namespace StormSurge.Interactables
                 //DEBUG: SET WEIGHT ??
                 //DEBUG: DEFAULT VALUE 1
                 selectionWeight = 100,
-                minimumStageCompletions = 1,
+                minimumStageCompletions = 0,
             },
             [new string[]
             {
@@ -57,7 +59,7 @@ namespace StormSurge.Interactables
             {
                 spawnCard = ShrineCard_Ash,
                 selectionWeight = 100,
-                minimumStageCompletions = 1,
+                minimumStageCompletions = 0,
             },
             [new string[]
             {
@@ -66,7 +68,7 @@ namespace StormSurge.Interactables
             {
                 spawnCard = ShrineCard_Tar,
                 selectionWeight = 100,
-                minimumStageCompletions = 1,
+                minimumStageCompletions = 0,
             },
             [new string[]
             {
@@ -76,7 +78,7 @@ namespace StormSurge.Interactables
             {
                 spawnCard = ShrineCard_Stars,
                 selectionWeight = 100,
-                minimumStageCompletions = 1,
+                minimumStageCompletions = 0,
             },
             [new string[]
             {
@@ -86,7 +88,7 @@ namespace StormSurge.Interactables
             {
                 spawnCard = ShrineCard_Snow,
                 selectionWeight = 100,
-                minimumStageCompletions = 1,
+                minimumStageCompletions = 0,
             },
         };
         protected override void AddCard()
@@ -128,50 +130,66 @@ namespace StormSurge.Interactables
             }
             return success;
         }
-        public static string SubtitleReplace(BossGroup group, string str)
+        static bool FamilyHasBody(CharacterBody body)
         {
-            if (!ShrineStormBehavior.stormActive) return str;
-            string result = "";
-            var success = FindSubtitle(out result);
-            if (!success) return str;
-
-            Debug.LogWarning(group);
-            Debug.LogWarning(result);
-            Debug.LogWarning(str);
-            return result;
-
+            var selection = StormItemsBehavior.CurrentFamily.monsterFamilyCategories;
+            foreach(Category category in selection.categories)
+            {
+                foreach(DirectorCard card in category.cards)
+                {
+                    var comparisonBody = card.spawnCard.prefab.GetComponentInChildren<CharacterBody>();
+                    if (comparisonBody && comparisonBody.bodyIndex == body.bodyIndex) return true;
+                }
+            }
+            return false;
         }
+
+        public delegate string RebuildSubtitle(string str, BossGroup group, ref BossMemory memory);
         [HarmonyILManipulator, HarmonyPatch(typeof(BossGroup), nameof(BossGroup.UpdateObservations))]
         public static void ILOverrideSubtitle(ILContext il)
         {
             var curs = new ILCursor(il);
+
             curs.GotoNext(MoveType.Before, x => x.MatchCallvirt(AccessTools.DeclaredPropertyGetter(typeof(CharacterBody), 
                 nameof(CharacterBody.healthComponent))));
 
             curs.GotoPrev(MoveType.After, x => x.MatchCall(AccessTools.DeclaredPropertyGetter(typeof(BossGroup), 
                 nameof(BossGroup.bestObservedSubtitle))));
-            //var oldOp = curs.Next.Operand;
-            curs.Emit(OpCodes.Ldarg_0);
-            //curs.Emit(OpCodes.Call,oldOp);
-            var method = typeof(StormShrineBase).GetMethod(nameof(SubtitleReplace));
-            var mRef = method.GenerateReference();
-            curs.Emit(OpCodes.Call, mRef); // was curs.Next.Operand = mRef;
 
+            curs.Emit(OpCodes.Ldarg_0);
+            curs.Emit(OpCodes.Ldarg_1);
+
+            curs.EmitDelegate<RebuildSubtitle>((string str, BossGroup group, ref BossMemory memory) =>
+            {
+                Debug.LogWarning(str);
+                if (!ShrineStormBehavior.stormActive || !FamilyHasBody(memory.cachedBody)) return str;
+                string result = "";
+                var success = FindSubtitle(out result);
+                if (!success) return str;
+
+                return result + " ";
+            }); // was curs.Next.Operand = mRef;
 
             //Debug.LogWarning($"\n{il}");
+
+
 
         }
         [HarmonyILManipulator, HarmonyPatch(typeof(ClassicStageInfo), nameof(ClassicStageInfo.RebuildCards))]
         public static void ILRebuildCards(ILContext il)
         {
             var curs = new ILCursor(il);
+            curs.GotoNext(MoveType.After, x => x.MatchLdfld<MonsterFamily>(nameof(MonsterFamily.minimumStageCompletion)));
+            curs.EmitDelegate<Action<int>>(_ => { });
+            curs.Emit(OpCodes.Ldc_I4_0);
+
             curs.GotoNext(MoveType.Before, x => x.MatchCallvirt<DirectorCardCategorySelection>(nameof(DirectorCardCategorySelection.CopyFrom)));
             int i = -1;
 
             curs.GotoPrev(MoveType.After, x => x.MatchStloc(out i));
 
             curs.Emit(OpCodes.Ldloc, i);
-            curs.EmitDelegate<Action<MonsterFamily>>(family =>
+            curs.EmitDelegate((MonsterFamily family) =>
             {
                 StormItemsBehavior.CurrentFamily = family;
                 //UnityEngine.Debug.LogWarning($"STORMSURGE :: Family selection token is {StormItemsBehavior.CurrentFamilyToken}");
@@ -180,11 +198,21 @@ namespace StormSurge.Interactables
         }
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector dir, DirectorCardCategorySelection selection)
         {
-            DirectorCard dCard = new()
-            {
-            };
+            DirectorCard dCard = new();
             int ind = Array.FindIndex(selection.categories, (item) => item.name.Equals("Shrines", StringComparison.OrdinalIgnoreCase));
             selection.AddCard(ind, dCard);
+        }
+        public static void OnSpawnedServerGlobal(SpawnCard.SpawnResult result)
+        {
+            if (!result.spawnedInstance || !ShrineStormBehavior.stormActive) return;
+            var body = result.spawnedInstance.GetComponentInChildren<CharacterBody>();
+            if (body && body.isBoss && FamilyHasBody(body))
+            {
+                Debug.LogWarning($"Setting {body.GetDisplayName()} to storming elite");
+                var ed = Assets.ContentPack.equipmentDefs.Find("edAffixStorming");
+                Debug.LogWarning($"Equipment index for {ed.name} is {ed.equipmentIndex}");
+                body.inventory.SetEquipmentIndex(ed.equipmentIndex) ;
+            }
         }
     }
     [CreateAssetMenu(menuName = "Stormsurge/Storm Event")]
@@ -206,15 +234,38 @@ namespace StormSurge.Interactables
                 return baseMonsterCredit * Stage.instance.entryDifficultyCoefficient;
             }
         }
+
+        #region Unity Methods
         void Awake()
         {
             familyChanceBase = monsterFamilyChance;
         }
+        private void Start()
+        {
+            if (!NetworkServer.active) return;
+            //Debug.LogWarning($"STORMSURGE : Shrine {gameObject.name} loaded!!");
+            ppVolume = FindObjectsOfType<PostProcessVolume>().Where(x => x.isGlobal == true).ToArray().First();
+            combatDirector = GetComponent<CombatDirector>();
+            SpawnCard.onSpawnedServerGlobal += StormShrineBase.OnSpawnedServerGlobal;
+            /*GetComponent<CombatSquad>().onMemberAddedServer += (CharacterMaster master) =>
+            {
+                Debug.LogWarning($"COMBAT SQUAD ADDED {master.GetBody().name}");
+            };*/
+        }
+        void OnDestroy()
+        {
+            monsterFamilyChance = familyChanceBase;
+            stormActive = false;
+        }
+        #endregion
+
         #region Storm Inst
         [Server]
         public void AddShrineStack(Interactor interactor)
         {
             stormActive = true;
+
+
             //BROADCAST STORM
             Chat.SendBroadcastChat(new Chat.SimpleChatMessage
             {
@@ -265,7 +316,7 @@ namespace StormSurge.Interactables
         void ForceFamilyEvent()
         {
 
-            monsterFamilyChance = 1f;
+            monsterFamilyChance = 100f;
             instance.monsterDccsPool = null;
             foreach (CombatDirector director in CombatDirector.instancesList)
             {
@@ -273,30 +324,13 @@ namespace StormSurge.Interactables
             }
             instance.RebuildCards();
         }
-        #endregion Storm Inst
-        private void Start()
-        {
-            if (!NetworkServer.active) return;
-            Debug.LogWarning($"STORMSURGE : Shrine {gameObject.name} loaded!!");
-            ppVolume = FindObjectsOfType<PostProcessVolume>().Where(x => x.isGlobal == true).ToArray().First();
-            combatDirector = GetComponent<CombatDirector>();
-            /*GetComponent<CombatSquad>().onMemberAddedServer += (CharacterMaster master) =>
-            {
-                Debug.LogWarning($"COMBAT SQUAD ADDED {master.GetBody().name}");
-            };*/
-        }
-        void OnDestroy()
-        {
-            monsterFamilyChance = familyChanceBase;
-            stormActive = false;
-        }
         void AddStormElites(Interactor interactor)
         {
             combatDirector!.enabled = true;
             combatDirector.monsterCredit += monsterCredit;
-            var combatCard = combatDirector.SelectMonsterCardForCombatShrine(monsterCredit);
+            /*var combatCard = combatDirector.SelectMonsterCardForCombatShrine(monsterCredit);
             Debug.LogWarning($"STORMSURGE:: combat card is {combatCard}, monster is {combatCard.spawnCard.prefab.name}");
-            combatDirector.OverrideCurrentMonsterCard(combatCard);
+            combatDirector.OverrideCurrentMonsterCard(combatCard);*/
             var eDef = Assets.ContentPack.eliteDefs.Find("edStorm");
             //Debug.LogWarning($"Setting Storm elites to def {eDef}");
             combatDirector.currentActiveEliteDef = eDef;
@@ -319,6 +353,9 @@ namespace StormSurge.Interactables
             //    }
             //}
         }
+        #endregion Storm Inst
+
+
 
 
         private CombatDirector? combatDirector;

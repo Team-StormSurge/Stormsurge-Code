@@ -4,6 +4,7 @@ using MonoMod.Cil;
 using RoR2;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
@@ -30,11 +31,23 @@ namespace StormSurge.Interactables
             gObj.GetComponent<EnemyInfoPanelInventoryProvider>().enabled = true;
             StormItemInventory = gObj.GetComponent<Inventory>();
             dropTable = FamilyPools.TryGetValue(CurrentFamily.familySelectionChatString, out dropTable) ? dropTable : FamilyPools["default"];
-            foreach(var entry in dropTable.pickupEntries)
+            var teleporterBoss = FindObjectsOfType<BossGroup>().Where((BossGroup group) => group.GetComponent<TeleporterInteraction>()).First();
+            teleporterBoss.combatSquad.onMemberDefeatedServer += (CharacterMaster master, DamageReport report) =>
+            {
+                teleporterBoss.bossDropTables.Add(dropTable);
+            };
+            foreach (var entry in dropTable.pickupEntries)
             {
                 if (entry.pickupDef is ItemDef)
-                    StormItemInventory.GiveItem(entry.pickupDef as ItemDef);
+                {
+                    ItemDef ID = entry.pickupDef as ItemDef;
+                    StormItemInventory.GiveItem(ID);
+                    var pickupIndex = PickupCatalog.FindPickupIndex(ID.itemIndex);
+                    teleporterBoss.bossDrops.Add(pickupIndex);
+                    //Debug.LogWarning($"Added {((ItemDef) entry.pickupDef).name} ({(int)ID.itemIndex}) to teleporter drop pool");
+                }
             }
+            
             foreach(var charMaster in FindObjectsOfType<CharacterMaster>())
             {
                 if(charMaster.teamIndex == TeamIndex.Monster)
@@ -109,6 +122,6 @@ namespace StormSurge.Interactables
                 return _networkedInventoryPrefab;
             }
         }
-        private static Inventory? StormItemInventory;
+        public static Inventory? StormItemInventory;
     }
 }
