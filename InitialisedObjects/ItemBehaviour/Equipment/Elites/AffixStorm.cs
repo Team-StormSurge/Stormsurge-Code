@@ -17,7 +17,7 @@ namespace StormSurge.Equipment.Elites
     [HarmonyPatch]
     public class AffixStorm : EquipBase
     {
-        protected override string equipDefName => "EliteStormEquipment";
+        protected override string equipDefName => "edAffixStorming";
         protected override string configName => "Storming Aspect";
 
         public override void AddEquipBehavior(){ }

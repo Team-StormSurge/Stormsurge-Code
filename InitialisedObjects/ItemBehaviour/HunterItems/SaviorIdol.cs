@@ -5,31 +5,17 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using RoR2;
 using RoR2.Items;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.ItemBehaviour
 {
     class SaviorIdol : ItemBase
     {
         #region LoadedContent
-        static BuffDef? _saviorEffect;
-        static BuffDef SaviorEffect
-        {
-            get
-            {
-                _saviorEffect ??= Assets.ContentPack.buffDefs.Find("SaviorEffect");
-                return _saviorEffect;
-            }
-        }
-
-        static NetworkSoundEventDef? _saviorEffectSound;
-        static NetworkSoundEventDef SaviorEffectSound
-        {
-            get
-            {
-                _saviorEffectSound ??= Assets.ContentPack.networkSoundEventDefs.Find("nseSaviorEffect");
-                return _saviorEffectSound;
-            }
-        }
+        static InstReference<BuffDef> SaviorEffect = new
+            (() => Assets.ContentPack.buffDefs.Find("SaviorEffect"));
+        static InstReference<NetworkSoundEventDef> SaviorEffectSound = new
+            (() => Assets.ContentPack.networkSoundEventDefs.Find("nseSaviorEffect"));
         #endregion
 
         protected override string itemDefName => "SaviorIdol";
@@ -100,7 +86,7 @@ namespace StormSurge.ItemBehaviour
 
                 if (luckBonus == finalLuck) return;
 
-                body?.SetBuffCount(SaviorEffect.buffIndex, finalLuck);
+                body?.SetBuffCount(SaviorEffect.Reference.buffIndex, finalLuck);
 
                 /*if(itemComponent.luckBonus < finalLuck)
                 {

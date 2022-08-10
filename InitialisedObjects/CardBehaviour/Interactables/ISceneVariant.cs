@@ -3,22 +3,21 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using UnityEngine;
 
 namespace StormSurge.Interactables
 {
     public interface ISceneVariant
     {
         string cardCategory { get; }
-        public Dictionary<string[], DirectorCard> SceneVariants
-        {
-            get;
-        }
+        public abstract SceneVariantList SceneVariants
+        { get; }
         bool GetSceneVariant(string sceneName, out DirectorCard returnedCard)
         {
-            returnedCard = SceneVariants.Where(x =>
+            returnedCard = SceneVariants.content.Where(x =>
             {
-                return x.Key.Contains(sceneName);
-            }).FirstOrDefault().Value;
+                return x.KeyList.Contains(sceneName);
+            }).FirstOrDefault().SpawnCard;
             return (returnedCard != null);
         }
         public virtual void AddVariantToDirector(SceneDirector director, DirectorCardCategorySelection selection)
@@ -33,5 +32,18 @@ namespace StormSurge.Interactables
             }
 
         }
+    }
+
+    [CreateAssetMenu(menuName = "Stormsurge/Scene Variant List")]
+    public class SceneVariantList : ScriptableObject
+    {
+        [Serializable]
+        public struct VariantSet
+        {
+            public string[] KeyList;
+            public DirectorCard SpawnCard;
+        }
+        [SerializeField]
+        public List<VariantSet> content;
     }
 }

@@ -5,21 +5,15 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.ItemBehaviour
 {
     class PackBond : ItemBase
     {
         #region LoadedContent
-        static NetworkSoundEventDef? _packBondBlockSound;
-        static NetworkSoundEventDef PackBondBlockSound
-        {
-            get
-            {
-                _packBondBlockSound ??= Assets.ContentPack.networkSoundEventDefs.Find("nsePackBondBlock");
-                return _packBondBlockSound;
-            }
-        }
+        static InstReference<NetworkSoundEventDef> PackBondBlockSound = new
+            (() => Assets.ContentPack.networkSoundEventDefs.Find("nsePackBondBlock"));
         #endregion
         protected override string itemDefName => "PackBond";
         protected override string configName => "Pack Bond";
@@ -61,7 +55,7 @@ namespace StormSurge.ItemBehaviour
                 //int itemCount = self.body.inventory.GetItemCount(initialised!.itemDef);
                 float damageReduc = itemCount * initialised!.armorPerAlly!.Value;
                 amount = UnityEngine.Mathf.Max(1f, amount - damageReduc);
-                if(itemCount > 0) RoR2.Audio.EntitySoundManager.EmitSoundServer(PackBondBlockSound.index, self.body.gameObject);
+                if(itemCount > 0) RoR2.Audio.EntitySoundManager.EmitSoundServer(PackBondBlockSound.Reference.index, self.body.gameObject);
                 return amount;
             });
             c.Emit(OpCodes.Stloc, num);

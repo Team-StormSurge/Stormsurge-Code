@@ -2,6 +2,7 @@
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
+using StormSurge.Utils.ReferenceHelper;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,15 +17,8 @@ namespace StormSurge.Interactables
     public class StormItemsBehavior : NetworkBehaviour
     {
         static ExplicitPickupDropTable dropTable;
-        static Xoroshiro128Plus _stormItemSeed;
-        static Xoroshiro128Plus ItemSeed
-        {
-            get
-            {
-                _stormItemSeed ??= new(Run.instance.seed);
-                return _stormItemSeed;
-            }
-        }
+        static InstReference<Xoroshiro128Plus> ItemSeed = new
+            (() => new(Run.instance.seed));
         void Start()
         {
             var gObj = Instantiate(NetworkedInventoryPrefab);
@@ -104,6 +98,8 @@ namespace StormSurge.Interactables
         }
 
         private static Dictionary<string, ExplicitPickupDropTable>? FamilyPools = new();
+
+        [Tooltip("The family event => drop table list for storm events.")]
         public List<FamilyPool> familyPools = new();
         [System.Serializable]
         public struct FamilyPool
@@ -111,6 +107,7 @@ namespace StormSurge.Interactables
             public string key;
             public ExplicitPickupDropTable table;
         }
+
         public static MonsterFamily CurrentFamily;
         private static GameObject? _networkedInventoryPrefab;
         private static GameObject NetworkedInventoryPrefab

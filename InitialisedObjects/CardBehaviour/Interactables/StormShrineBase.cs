@@ -16,92 +16,20 @@ using Mono.Cecil;
 using StormSurge.Utils;
 using static RoR2.DirectorCardCategorySelection;
 using static RoR2.BossGroup;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.Interactables
 {
     public class StormShrineBase : CardBase, ISceneVariant
     {
-        #region Shrine Cards
-        public static InteractableSpawnCard ShrineCard_Rain => Assets.AssetBundle.LoadAsset<InteractableSpawnCard>("iscShrineStorm.asset");
-        public static InteractableSpawnCard ShrineCard_Ash => Assets.AssetBundle.LoadAsset<InteractableSpawnCard>("iscShrineStormFire.asset");
-        public static InteractableSpawnCard ShrineCard_Snow => Assets.AssetBundle.LoadAsset<InteractableSpawnCard>("iscShrineStormSnow.asset");
-        public static InteractableSpawnCard ShrineCard_Tar => Assets.AssetBundle.LoadAsset<InteractableSpawnCard>("iscShrineStormTar.asset");
-        public static InteractableSpawnCard ShrineCard_Stars => Assets.AssetBundle.LoadAsset<InteractableSpawnCard>("iscShrineStormStars.asset");
-        #endregion Shrine Cards
         protected override string configName => "Shrine of Storms";
-
         public string cardCategory => "Shrines";
-        public Dictionary<string[], DirectorCard> SceneVariants => new Dictionary<string[], DirectorCard>()
-        {
-            [new string[]
-            {
-                "MAP_ANCIENTLOFT_TITLE",
-                "MAP_BLACKBEACH_TITLE", 
-                "MAP_GOLEMPLAINS_TITLE", 
-                "MAP_FOGGYSWAMP_TITLE", 
-                "MAP_SHIPGRAVEYARD_TITLE",
-                "MAP_ROOTJUNGLE_TITLE",
 
-            }] = new() 
-            {
-                spawnCard = ShrineCard_Rain,
-                //DEBUG: SET COST 20,
-                //DEBUG: SET WEIGHT ??
-                //DEBUG: DEFAULT VALUE 1
-                selectionWeight = 100,
-                minimumStageCompletions = 0,
-            },
-            [new string[]
-            {
-                "MAP_DAMPCAVE_TITLE",
-                "MAP_WISPGRAVEYARD_TITLE",
-            }] = new()
-            {
-                spawnCard = ShrineCard_Ash,
-                selectionWeight = 100,
-                minimumStageCompletions = 0,
-            },
-            [new string[]
-            {
-                "MAP_GOOLAKE_TITLE",
-            }] = new()
-            {
-                spawnCard = ShrineCard_Tar,
-                selectionWeight = 100,
-                minimumStageCompletions = 0,
-            },
-            [new string[]
-            {
-                "MAP_ARENA_TITLE",
-                "MAP_SKYMEADOW_TITLE",
-            }] = new()
-            {
-                spawnCard = ShrineCard_Stars,
-                selectionWeight = 100,
-                minimumStageCompletions = 0,
-            },
-            [new string[]
-            {
-                "MAP_FROZENWALL_TITLE",
-                "MAP_SNOWYFOREST_TITLE",
-            }] = new()
-            {
-                spawnCard = ShrineCard_Snow,
-                selectionWeight = 100,
-                minimumStageCompletions = 0,
-            },
-        };
+        public SceneVariantList SceneVariants => Assets.AssetBundle.LoadAsset<SceneVariantList>("ShrineStormVariants.asset");
         protected override void AddCard()
         {
             SceneDirector.onGenerateInteractableCardSelection += (this as ISceneVariant).AddVariantToDirector;
         }
-
-        //[HarmonyPostfix, HarmonyPatch(typeof(BossGroup),nameof(BossGroup.UpdateObservations))]
-        //public static void overrideSubtitle(BossGroup __instance, ref BossGroup.BossMemory memory)
-        //{
-        //    if(!__instance.GetComponent<ShrineStormBehavior>()) return;
-        //    __instance.bestObservedSubtitle = $"<sprite name =\"CloudLeft\" tint=1><sprite name=\"CloudRight\" tint=1>";
-        //}
         static Dictionary<string, string> subtitles = new()
         {
             ["FAMILY_GOLEM"] = "SS_SUBTITLE_GOLEMFAMILY",
@@ -137,8 +65,15 @@ namespace StormSurge.Interactables
             {
                 foreach(DirectorCard card in category.cards)
                 {
-                    var comparisonBody = card.spawnCard.prefab.GetComponentInChildren<CharacterBody>();
-                    if (comparisonBody && comparisonBody.bodyIndex == body.bodyIndex) return true;
+                    var comparisonMaster = card.spawnCard.prefab.GetComponentInChildren<CharacterMaster>();
+                    var master = body?.master;
+                    if (!comparisonMaster || !master) continue;
+                    //Debug.LogWarning($"Comparing master indices {(int)comparisonMaster.masterIndex} ({comparisonMaster.name}) & {(int)master!.masterIndex} ({master.name})");
+                    if ((int) comparisonMaster.masterIndex == (int) master.masterIndex)
+                    {
+                        //Debug.LogWarning($"{master.name} will be a Storming Elite!");
+                        return true;
+                    }
                 }
             }
             return false;
@@ -175,6 +110,18 @@ namespace StormSurge.Interactables
 
 
         }
+        [HarmonyILManipulator, HarmonyPatch(typeof(VisionLimitEffect), nameof(VisionLimitEffect.UpdateCommandBuffer))]
+        public static void ChangeBlindColor(ILContext il)
+        {
+            var c = new ILCursor(il);
+            c.GotoNext(x => x.MatchCallOrCallvirt<Material>(nameof(Material.SetColor)));
+            c.EmitDelegate<Func<Color, Color>>(color =>
+            {
+                if (ShrineStormBehavior.stormActive) // storm enabled;
+                    return ShrineStormBehavior.activeEvent.fogColour;
+                return color;
+            });
+        }
         [HarmonyILManipulator, HarmonyPatch(typeof(ClassicStageInfo), nameof(ClassicStageInfo.RebuildCards))]
         public static void ILRebuildCards(ILContext il)
         {
@@ -202,26 +149,53 @@ namespace StormSurge.Interactables
             int ind = Array.FindIndex(selection.categories, (item) => item.name.Equals("Shrines", StringComparison.OrdinalIgnoreCase));
             selection.AddCard(ind, dCard);
         }
+        static InstReference<EquipmentDef> StormingDef = new
+            (() => Assets.ContentPack.equipmentDefs.Find("edAffixStorming"));
         public static void OnSpawnedServerGlobal(SpawnCard.SpawnResult result)
         {
-            if (!result.spawnedInstance || !ShrineStormBehavior.stormActive) return;
-            var body = result.spawnedInstance.GetComponentInChildren<CharacterBody>();
-            if (body && body.isBoss && FamilyHasBody(body))
+            //Debug.LogWarning($"Spawned instance is {result.spawnedInstance}");
+            if (!result.success || !ShrineStormBehavior.stormActive) return;
+
+            var master = result.spawnedInstance.GetComponent<CharacterMaster>();
+            if (!master) return;
+            //Debug.LogWarning($"Spawned instance master is {master}");
+            var body = master.GetBody();
+            //Debug.LogWarning($"Spawned instance body is {body}");
+
+            if (master && body.isBoss && FamilyHasBody(body))
             {
-                Debug.LogWarning($"Setting {body.GetDisplayName()} to storming elite");
-                var ed = Assets.ContentPack.equipmentDefs.Find("edAffixStorming");
-                Debug.LogWarning($"Equipment index for {ed.name} is {ed.equipmentIndex}");
-                body.inventory.SetEquipmentIndex(ed.equipmentIndex) ;
+                //Debug.LogWarning($"Setting {body.GetDisplayName()} to storming elite");
+                //var ed = Assets.ContentPack.equipmentDefs.Find("edAffixStorming");
+                //Debug.LogWarning($"Equipment index for {ed.name} is {ed.equipmentIndex}");
+                body.inventory.SetEquipmentIndex(((EquipmentDef)StormingDef).equipmentIndex) ;
             }
         }
     }
     [CreateAssetMenu(menuName = "Stormsurge/Storm Event")]
     public class StormEvent : UnityEngine.ScriptableObject
     {
+        [Header("Main Properties")]
+
+        [Tooltip("The biome-specific token for the storm event.")]
         public string? startMessageToken;
+
+        [Tooltip("The Particle Systems created.")]
         public GameObject? stormEffect;
+
+        [Tooltip("The PP Volume added.")]
         public GameObject? postProcessingVolume;
+
+        [Tooltip("Defines the storm's wet-ground material.")][Obsolete]
         public Material? StormMaterial;
+
+        [Space(height: 2)]
+        [Header("Fog Properties")]
+
+        [Tooltip("Controls the colour of the blindness effect.")]
+        public Color fogColour;
+
+        [Tooltip("The distance at which blindness fog renders.")]
+        public int fogDistance;
     }
 
     [RequireComponent(typeof(CombatDirector), typeof(StormItemsBehavior))]
@@ -256,6 +230,7 @@ namespace StormSurge.Interactables
         {
             monsterFamilyChance = familyChanceBase;
             stormActive = false;
+            activeEvent = null;
         }
         #endregion
 
@@ -264,7 +239,7 @@ namespace StormSurge.Interactables
         public void AddShrineStack(Interactor interactor)
         {
             stormActive = true;
-
+            activeEvent = stormEvent;
 
             //BROADCAST STORM
             Chat.SendBroadcastChat(new Chat.SimpleChatMessage
@@ -281,7 +256,16 @@ namespace StormSurge.Interactables
 
             //TODO
             AddStormElites(interactor);
+            AddVisionLimit();
 
+        }
+        void AddVisionLimit()
+        {   if (stormEvent == null) return;
+            var bodies = FindObjectsOfType<CharacterBody>();
+            foreach(CharacterBody body in bodies)
+            {
+                body.baseVisionDistance = stormEvent.fogDistance;
+            }
         }
         void AddStormParticles()
         {
@@ -364,8 +348,12 @@ namespace StormSurge.Interactables
         float familyChanceBase;
 
         public static bool stormActive = false;
+        public static StormEvent activeEvent;
 
+        [Tooltip("The credits spent on spawning a Storming Wave.")]
         public float baseMonsterCredit;
+
+        [Tooltip("The StormEvent object activated when this shrine is used.")]
         public StormEvent? stormEvent;
     }
 }
