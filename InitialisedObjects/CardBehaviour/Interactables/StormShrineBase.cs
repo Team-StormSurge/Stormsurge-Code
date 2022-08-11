@@ -17,6 +17,7 @@ using StormSurge.Utils;
 using static RoR2.DirectorCardCategorySelection;
 using static RoR2.BossGroup;
 using StormSurge.Utils.ReferenceHelper;
+using static StormSurge.Interactables.StormShrineBase;
 
 namespace StormSurge.Interactables
 {
@@ -50,7 +51,7 @@ namespace StormSurge.Interactables
         public static bool FindSubtitle(out string result)
         {
             result = "";
-            var success = subtitles.TryGetValue(StormItemsBehavior.CurrentFamily.familySelectionChatString, out result);
+            var success = subtitles.TryGetValue(StormShrineBase.ActiveFamily.selectionChatString, out result);
             //Debug.LogWarning($"Current family token is {CurrentFamilyToken}; Success = {success}; result is {result}; final value is {final}");
             if (success)
             {
@@ -60,7 +61,7 @@ namespace StormSurge.Interactables
         }
         static bool FamilyHasBody(CharacterBody body)
         {
-            var selection = StormItemsBehavior.CurrentFamily.monsterFamilyCategories;
+            var selection = StormShrineBase.ActiveFamily;
             if (selection?.categories == default) return false;
             foreach(Category category in selection.categories)
             {
@@ -69,7 +70,7 @@ namespace StormSurge.Interactables
                     var comparisonMaster = card.spawnCard.prefab.GetComponentInChildren<CharacterMaster>();
                     var master = body?.master;
                     if (!comparisonMaster || !master) continue;
-                    //Debug.LogWarning($"Comparing master indices {(int)comparisonMaster.masterIndex} ({comparisonMaster.name}) & {(int)master!.masterIndex} ({master.name})");
+                    Debug.LogWarning($"Comparing master indices {(int)comparisonMaster.masterIndex} ({comparisonMaster.name}) & {(int)master!.masterIndex} ({master.name})");
                     if ((int) comparisonMaster.masterIndex == (int) master.masterIndex)
                     {
                         //Debug.LogWarning($"{master.name} will be a Storming Elite!");
@@ -123,7 +124,62 @@ namespace StormSurge.Interactables
                 return color;
             });
         }
+        public static DirectorCardCategorySelection evalFamily(DirectorCardCategorySelection oldSelection, float randomNext, ClassicStageInfo info)
+        {
+            //Debug.LogWarning($"Method has selection {oldSelection}, float {randomNext}, and info {info}");
+            //Debug.LogWarning("Rebuilding cards, checking if storm is active");
+            if (ShrineStormBehavior.stormActive)
+            {
+                Debug.LogWarning("Storm is active! Finding Family dccs category!");
+                var selection = new WeightedSelection<DirectorCardCategorySelection>(8);
+                var options = info.monsterDccsPool.poolCategories.Where((category) => category.name.Equals("Family", StringComparison.OrdinalIgnoreCase)).FirstOrDefault().includedIfConditionsMet;
+                foreach (var option in options)
+                {
+                    selection.AddChoice(option.dccs, option.weight);
+                }
+                var final = selection?.Evaluate(randomNext);
+                if (final && final is FamilyDirectorCardCategorySelection)
+                {
+                    ActiveFamily = final as FamilyDirectorCardCategorySelection;
+                    return final;
+                }
+                else Debug.LogError($"Could not find family pool! Returning to non-storm behaviours!");
+            }
+            Debug.LogWarning("Not storming- returning default selection instead! :: " + oldSelection);
+            return oldSelection;
+        }
         [HarmonyILManipulator, HarmonyPatch(typeof(ClassicStageInfo), nameof(ClassicStageInfo.RebuildCards))]
+        public static void ILRebuildCards(ILContext il)
+        {
+            var curs = new ILCursor(il);
+            curs.GotoNext(x => x.MatchLdfld<ClassicStageInfo>(nameof(ClassicStageInfo.monsterDccsPool)));
+            curs.GotoNext(x => x.MatchCallvirt(AccessTools.DeclaredPropertyGetter(typeof(Xoroshiro128Plus),
+                nameof(Xoroshiro128Plus.nextNormalizedFloat))));
+            var prev = curs.Prev;
+            var next = curs.Next;
+            var method = AccessTools.DeclaredMethod(typeof(WeightedSelection<DirectorCardCategorySelection>),
+                nameof(WeightedSelection<DirectorCard>.Evaluate));
+            curs.GotoNext(MoveType.After, x =>
+                x.MatchCallvirt(method));
+            curs.Emit(prev.OpCode, prev.Operand);
+            curs.Emit(next.OpCode, next.Operand);
+            curs.Emit(OpCodes.Ldarg_0);
+            curs.Emit(OpCodes.Call, AccessTools.DeclaredMethod(typeof(StormShrineBase),nameof(StormShrineBase.evalFamily)));
+            //Debug.LogWarning(il + "\n\n");
+        }
+        [HarmonyILManipulator, HarmonyPatch(typeof(FamilyDirectorCardCategorySelection),nameof(FamilyDirectorCardCategorySelection.IsAvailable))]
+        public static void ILIsAvailable(ILContext il)
+        {
+            var curs = new ILCursor(il);
+
+            curs.GotoNext(MoveType.After, x => x.MatchLdfld<FamilyDirectorCardCategorySelection>(nameof(FamilyDirectorCardCategorySelection.minimumStageCompletion)));
+            curs.EmitDelegate<Func<int, int>>(val => 0);
+
+            curs.GotoNext(MoveType.After, x => x.MatchLdfld<FamilyDirectorCardCategorySelection>(nameof(FamilyDirectorCardCategorySelection.maximumStageCompletion)));
+            curs.EmitDelegate<Func<int, int>>(val => int.MaxValue);
+
+        }
+        /*[HarmonyILManipulator, HarmonyPatch(typeof(ClassicStageInfo), nameof(ClassicStageInfo.RebuildCards))]
         public static void ILRebuildCards(ILContext il)
         {
             var curs = new ILCursor(il);
@@ -139,11 +195,11 @@ namespace StormSurge.Interactables
             curs.Emit(OpCodes.Ldloc, i);
             curs.EmitDelegate((MonsterFamily family) =>
             {
-                StormItemsBehavior.CurrentFamily = family;
-                //UnityEngine.Debug.LogWarning($"STORMSURGE :: Family selection token is {StormItemsBehavior.CurrentFamilyToken}");
+                StormShrineBase.ActiveFamily = family;
+                //UnityEngine.Debug.LogWarning($"STORMSURGE :: Family selection token is {StormShrineBase.ActiveFamilyToken}");
             });
             //Debug.LogWarning(il);
-        }
+        }*/
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector dir, DirectorCardCategorySelection selection)
         {
             DirectorCard dCard = new();
@@ -171,6 +227,8 @@ namespace StormSurge.Interactables
                 body.inventory.SetEquipmentIndex(((EquipmentDef)StormingDef).equipmentIndex) ;
             }
         }
+
+        public static FamilyDirectorCardCategorySelection ActiveFamily;
     }
     [CreateAssetMenu(menuName = "Stormsurge/Storm Event")]
     public class StormEvent : UnityEngine.ScriptableObject
@@ -229,7 +287,11 @@ namespace StormSurge.Interactables
         }
         void OnDestroy()
         {
-            monsterFamilyChance = familyChanceBase;
+            Stop();
+        }
+        void Stop()
+        {
+
             stormActive = false;
             activeEvent = null;
         }
@@ -241,12 +303,12 @@ namespace StormSurge.Interactables
         {
             stormActive = true;
             activeEvent = stormEvent;
-
             //FORCE FAMILY EVENT TO START
             ForceFamilyEvent();
-            if (StormItemsBehavior.CurrentFamily.familySelectionChatString == default)
+            if (ActiveFamily == null)
             {
-                Debug.LogError($"STORMSURGE :: COULD NOT FIND A FAMILY EVENT!!");
+                Debug.LogError($"No Family event found! This is either a hidden realm, or ya fucked up big-time, cuz!");
+                return;
             }
 
             //BROADCAST STORM
@@ -268,7 +330,8 @@ namespace StormSurge.Interactables
 
         }
         void AddVisionLimit()
-        {   if (stormEvent == null) return;
+        {
+
             var bodies = FindObjectsOfType<CharacterBody>();
             foreach(CharacterBody body in bodies)
             {
@@ -309,7 +372,6 @@ namespace StormSurge.Interactables
         {
 
             monsterFamilyChance = 100f;
-            instance.monsterDccsPool = null;
             foreach (CombatDirector director in CombatDirector.instancesList)
             {
                 director.monsterCardsSelection = null;

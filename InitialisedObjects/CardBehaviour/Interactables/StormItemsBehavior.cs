@@ -11,6 +11,7 @@ using UnityEngine;
 using UnityEngine.Networking;
 using static RoR2.ClassicStageInfo;
 using static StormSurge.Equipment.Elites.AffixStorm;
+using static StormSurge.Interactables.StormShrineBase;
 
 namespace StormSurge.Interactables
 {
@@ -25,9 +26,13 @@ namespace StormSurge.Interactables
             gObj.GetComponent<EnemyInfoPanelInventoryProvider>().enabled = true;
             StormItemInventory = gObj.GetComponent<Inventory>();
 
-            if (CurrentFamily.familySelectionChatString == null) return;
+            if (ActiveFamily == null)
+            {
+                enabled = false;
+                return;
+            }
 
-            dropTable = FamilyPools.TryGetValue(CurrentFamily.familySelectionChatString, out dropTable) ? dropTable : FamilyPools["default"];
+            dropTable = FamilyPools.TryGetValue(ActiveFamily.selectionChatString, out dropTable) ? dropTable : FamilyPools["default"];
             var teleporterBoss = FindObjectsOfType<BossGroup>().Where((BossGroup group) => group.GetComponent<TeleporterInteraction>()).First();
             teleporterBoss.combatSquad.onMemberDefeatedServer += (CharacterMaster master, DamageReport report) =>
             {
@@ -74,7 +79,6 @@ namespace StormSurge.Interactables
         {
             SpawnCard.onSpawnedServerGlobal -= SpawnHunterEnemy;
             GlobalEventManager.onCharacterDeathGlobal -= CheckStormingItem;
-            CurrentFamily = default;
             Destroy(StormItemInventory!.gameObject);
         }
 
@@ -113,7 +117,6 @@ namespace StormSurge.Interactables
         }
 
 
-        public static MonsterFamily CurrentFamily;
         private static GameObject? _networkedInventoryPrefab;
         private static GameObject NetworkedInventoryPrefab
         {
