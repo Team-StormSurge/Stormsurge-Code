@@ -2,18 +2,23 @@
 	"strings":
 	{
         "ITEM_HUNTER_SAVIORIDOL_NAME" : "Savior Idol",
-		"ITEM_HUNTER_SAVIORIDOL_PICKUP" : "In peril : find clarity.",
+		"ITEM_HUNTER_SAVIORIDOL_PICKUP" : "In peril: find clarity.",
         "ITEM_HUNTER_SAVIORIDOL_DESC" : "placeholder",
         "ITEM_HUNTER_SAVIORIDOL_LORE" : "placeholder",
 		
         "ITEM_HUNTER_GOLEMEYE_NAME" : "Golem's Deadeye",
-		"ITEM_HUNTER_GOLEMEYE_PICKUP" : "Gain power from consistent attacks.",
+		"ITEM_HUNTER_GOLEMEYE_PICKUP" : "Beat them like drums.",
 		"ITEM_HUNTER_GOLEMEYE_DESC" : "placeholder",
 		"ITEM_HUNTER_GOLEMEYE_LORE" : "placeholder",
 		
 		"ITEM_HUNTER_PACKBOND_NAME" : "Pack Bond",
-		"ITEM_HUNTER_PACKBOND_PICKUP" : "Grant flat damage reduction to all allies.",
+		"ITEM_HUNTER_PACKBOND_PICKUP" : "The hive thrives together.",
 		"ITEM_HUNTER_PACKBOND_DESC" : "placeholder",
 		"ITEM_HUNTER_PACKBOND_LORE" : "placeholder"
+
+		"ITEM_HUNTER_TARHEART_NAME" : "Apothecary Heart",
+		"ITEM_HUNTER_TARHEART_PICKUP" : "Malleable Disease...",
+		"ITEM_HUNTER_TARHEART_DESC" : "placeholder",
+		"ITEM_HUNTER_TARHEART_LORE" : "placeholder"
 	}
 }

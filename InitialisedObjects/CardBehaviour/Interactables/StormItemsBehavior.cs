@@ -24,6 +24,9 @@ namespace StormSurge.Interactables
             var gObj = Instantiate(NetworkedInventoryPrefab);
             gObj.GetComponent<EnemyInfoPanelInventoryProvider>().enabled = true;
             StormItemInventory = gObj.GetComponent<Inventory>();
+
+            if (CurrentFamily.familySelectionChatString == null) return;
+
             dropTable = FamilyPools.TryGetValue(CurrentFamily.familySelectionChatString, out dropTable) ? dropTable : FamilyPools["default"];
             var teleporterBoss = FindObjectsOfType<BossGroup>().Where((BossGroup group) => group.GetComponent<TeleporterInteraction>()).First();
             teleporterBoss.combatSquad.onMemberDefeatedServer += (CharacterMaster master, DamageReport report) =>
@@ -97,16 +100,18 @@ namespace StormSurge.Interactables
             }
         }
 
-        private static Dictionary<string, ExplicitPickupDropTable>? FamilyPools = new();
+        private static Dictionary<string, ExplicitPickupDropTable> FamilyPools = new();
 
         [Tooltip("The family event => drop table list for storm events.")]
-        public List<FamilyPool> familyPools = new();
+        public List<FamilyPool> familyPools;
+
         [System.Serializable]
         public struct FamilyPool
         {
             public string key;
             public ExplicitPickupDropTable table;
         }
+
 
         public static MonsterFamily CurrentFamily;
         private static GameObject? _networkedInventoryPrefab;

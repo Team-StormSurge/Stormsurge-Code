@@ -4,7 +4,7 @@ using System.Text;
 
 namespace StormSurge.Utils.ReferenceHelper
 {
-    public class InstReference<T> where T : class
+    public class InstReference<T> where T : class?
     {
         Func<T> refMethod;
         public InstReference(Func<T> RefMethod)
@@ -16,10 +16,15 @@ namespace StormSurge.Utils.ReferenceHelper
         { 
             get
             {
-                return Reference ??= refMethod();
+                if (_backingField == default)
+                {
+                    _backingField = refMethod();
+                    UnityEngine.Debug.LogWarning($"{_backingField} is being initialised; was {default(T)?.ToString() ?? "null"}");
+                }
+                return _backingField;
             }
             private set
-            {Reference = value;}
+            {_backingField = value;}
         }
         public static implicit operator T(InstReference<T> self)
         {

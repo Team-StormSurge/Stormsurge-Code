@@ -61,6 +61,7 @@ namespace StormSurge.Interactables
         static bool FamilyHasBody(CharacterBody body)
         {
             var selection = StormItemsBehavior.CurrentFamily.monsterFamilyCategories;
+            if (selection?.categories == default) return false;
             foreach(Category category in selection.categories)
             {
                 foreach(DirectorCard card in category.cards)
@@ -96,7 +97,7 @@ namespace StormSurge.Interactables
 
             curs.EmitDelegate<RebuildSubtitle>((string str, BossGroup group, ref BossMemory memory) =>
             {
-                Debug.LogWarning(str);
+                //Debug.LogWarning(str);
                 if (!ShrineStormBehavior.stormActive || !FamilyHasBody(memory.cachedBody)) return str;
                 string result = "";
                 var success = FindSubtitle(out result);
@@ -241,22 +242,29 @@ namespace StormSurge.Interactables
             stormActive = true;
             activeEvent = stormEvent;
 
+            //FORCE FAMILY EVENT TO START
+            ForceFamilyEvent();
+            if (StormItemsBehavior.CurrentFamily.familySelectionChatString == default)
+            {
+                Debug.LogError($"STORMSURGE :: COULD NOT FIND A FAMILY EVENT!!");
+            }
+
             //BROADCAST STORM
             Chat.SendBroadcastChat(new Chat.SimpleChatMessage
             {
                 baseToken = stormEvent?.startMessageToken
             });
-            ForceFamilyEvent();
+
+            //Add PP (fog, blindness, etc), and wind
             AddStormPostProcessing();
             AddStormWind();
+            AddVisionLimit();
 
-            //TODO
             AddStormWetGround();
             AddStormParticles();
 
-            //TODO
+            //Spawn storming elite squad
             AddStormElites(interactor);
-            AddVisionLimit();
 
         }
         void AddVisionLimit()
@@ -312,30 +320,9 @@ namespace StormSurge.Interactables
         {
             combatDirector!.enabled = true;
             combatDirector.monsterCredit += monsterCredit;
-            /*var combatCard = combatDirector.SelectMonsterCardForCombatShrine(monsterCredit);
-            Debug.LogWarning($"STORMSURGE:: combat card is {combatCard}, monster is {combatCard.spawnCard.prefab.name}");
-            combatDirector.OverrideCurrentMonsterCard(combatCard);*/
             var eDef = Assets.ContentPack.eliteDefs.Find("edStorm");
-            //Debug.LogWarning($"Setting Storm elites to def {eDef}");
             combatDirector.currentActiveEliteDef = eDef;
             combatDirector.monsterSpawnTimer = 0f;
-            //CharacterMaster component = chosenDirectorCard.spawnCard.prefab.GetComponent<CharacterMaster>();
-            //if (component)
-            //{
-            //    CharacterBody component2 = component.bodyPrefab.GetComponent<CharacterBody>();
-            //    if (component2)
-            //    {
-            //        Chat.SendBroadcastChat(new Chat.SubjectFormatChatMessage
-            //        {
-            //            subjectAsCharacterBody = interactor.GetComponent<CharacterBody>(),
-            //            baseToken = "SHRINE_STORM_COMBAT_MESSAGE",
-            //            paramTokens = new string[]
-            //            {
-            //                component2.baseNameToken
-            //            }
-            //        });
-            //    }
-            //}
         }
         #endregion Storm Inst
 
