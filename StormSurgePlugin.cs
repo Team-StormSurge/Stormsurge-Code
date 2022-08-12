@@ -14,7 +14,6 @@ using SearchableAttribute = HG.Reflection.SearchableAttribute;
 namespace StormSurge
 {
 	//[BepInDependency(R2API.R2API.PluginGUID)]
-	[BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
 	[BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERSION)]
 	public class StormSurgePlugin : BaseUnityPlugin
 	{

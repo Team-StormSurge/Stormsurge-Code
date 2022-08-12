@@ -9,7 +9,7 @@ namespace StormSurge.Interactables
 {
     public interface ISceneVariant
     {
-        string cardCategory { get; }
+        string[] cardCategories { get; }
         public abstract SceneVariantList SceneVariants
         { get; }
         bool GetSceneVariant(string sceneName, out DirectorCard returnedCard)
@@ -26,9 +26,14 @@ namespace StormSurge.Interactables
             var gotValue = GetSceneVariant(SceneInfo.instance.sceneDef.nameToken, out dCard);
             if (gotValue)
             {
-                int ind = Array.FindIndex(selection.categories, (item) => item.name.Equals(cardCategory, StringComparison.OrdinalIgnoreCase));
-                //UnityEngine.Debug.LogWarning($"STORMSURGE : added shrine {dCard.spawnCard.name} to stage {SceneInfo.instance.sceneDef.nameToken}");
-                selection.AddCard(ind, dCard);
+                foreach(string category in cardCategories)
+                {
+                    int ind = Array.FindIndex(selection.categories, (item) => item.name.Equals(category, StringComparison.OrdinalIgnoreCase));
+                    if (ind >= 0)
+                        selection.AddCard(ind, dCard);
+                    return;
+                    //UnityEngine.Debug.LogWarning($"STORMSURGE : added shrine {dCard.spawnCard.name} to stage {SceneInfo.instance.sceneDef.nameToken}");
+                }
             }
 
         }

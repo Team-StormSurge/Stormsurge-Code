@@ -1,10 +1,10 @@
 {
 	"strings":
 	{
-		"SS_SHRINE_STORM_STARTRAIN" : "<style=cShrine>A totem discarded: A wicked downpour forms...</style>",
-        "SS_SHRINE_STORM_STARTTAR" : "<style=cShrine>A totem discarded: The infection hungers for more...</style>",
-        "SS_SHRINE_STORM_STARTASH" : "<style=cShrine>A totem discarded: Flakes and embers dance around...</style>",
-        "SS_SHRINE_STORM_STARTSNOW" : "<style=cShrine>A totem discarded: Snow pelts the terrain...</style>",
-        "SS_SHRINE_STORM_STARTSTARS" : "<style=cShrine>A totem discarded: Whistling lights loom close...</style>"
+		"SS_SHRINE_STORM_STARTRAIN" : "<style=cWorldEvent>[SHRINE DESECRATED] A wicked downpour forms...</style>",
+        "SS_SHRINE_STORM_STARTTAR" : "<style=cWorldEvent>[SHRINE DESECRATED] The infection hungers for more...</style>",
+        "SS_SHRINE_STORM_STARTASH" : "<style=cWorldEvent>[SHRINE DESECRATED] Flakes and embers dance around...</style>",
+        "SS_SHRINE_STORM_STARTSNOW" : "<style=cWorldEvent>[SHRINE DESECRATED] Snow pelts the terrain...</style>",
+        "SS_SHRINE_STORM_STARTSTARS" : "<style=cWorldEvent>[SHRINE DESECRATED] Whistling lights loom close...</style>"
 	}
 }

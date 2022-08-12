@@ -24,7 +24,7 @@ namespace StormSurge.Interactables
     public class StormShrineBase : CardBase, ISceneVariant
     {
         protected override string configName => "Shrine of Storms";
-        public string cardCategory => "Shrines";
+        public string[] cardCategories => new string[]{"Shrines", "VoidStuff"};
 
         public SceneVariantList SceneVariants => Assets.AssetBundle.LoadAsset<SceneVariantList>("ShrineStormVariants.asset");
         protected override void AddCard()
@@ -70,7 +70,7 @@ namespace StormSurge.Interactables
                     var comparisonMaster = card.spawnCard.prefab.GetComponentInChildren<CharacterMaster>();
                     var master = body?.master;
                     if (!comparisonMaster || !master) continue;
-                    Debug.LogWarning($"Comparing master indices {(int)comparisonMaster.masterIndex} ({comparisonMaster.name}) & {(int)master!.masterIndex} ({master.name})");
+                    //Debug.LogWarning($"Comparing master indices {(int)comparisonMaster.masterIndex} ({comparisonMaster.name}) & {(int)master!.masterIndex} ({master.name})");
                     if ((int) comparisonMaster.masterIndex == (int) master.masterIndex)
                     {
                         //Debug.LogWarning($"{master.name} will be a Storming Elite!");
@@ -137,13 +137,17 @@ namespace StormSurge.Interactables
                 {
                     selection.AddChoice(option.dccs, option.weight);
                 }
-                var final = selection?.Evaluate(randomNext);
-                if (final && final is FamilyDirectorCardCategorySelection)
+                var eval = selection?.Evaluate(randomNext);
+                if (eval && eval is FamilyDirectorCardCategorySelection)
                 {
-                    ActiveFamily = final as FamilyDirectorCardCategorySelection;
-                    return final;
+                    var final = eval as FamilyDirectorCardCategorySelection;
+                    if (final != null)
+                    {
+                        ActiveFamily = final;
+                        return final;
+                    }
                 }
-                else Debug.LogError($"Could not find family pool! Returning to non-storm behaviours!");
+                Debug.LogError($"Could not find family pool! Returning to non-storm behaviours!");
             }
             Debug.LogWarning("Not storming- returning default selection instead! :: " + oldSelection);
             return oldSelection;
