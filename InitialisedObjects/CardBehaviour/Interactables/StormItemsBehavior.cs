@@ -18,7 +18,7 @@ namespace StormSurge.Interactables
     public class StormItemsBehavior : NetworkBehaviour
     {
         static ExplicitPickupDropTable dropTable;
-        static InstReference<Xoroshiro128Plus> ItemSeed = new
+        static InstRef<Xoroshiro128Plus> ItemSeed = new
             (() => new(Run.instance.seed));
         void Start()
         {

@@ -12,7 +12,7 @@ namespace StormSurge.ItemBehaviour
     class PackBond : ItemBase
     {
         #region LoadedContent
-        static InstReference<NetworkSoundEventDef> PackBondBlockSound = new
+        static InstRef<NetworkSoundEventDef> PackBondBlockSound = new
             (() => Assets.ContentPack.networkSoundEventDefs.Find("nsePackBondBlock"));
         #endregion
         protected override string itemDefName => "PackBond";

@@ -11,6 +11,7 @@ using RoR2.Orbs;
 using UnityEngine.Networking;
 using RoR2.Projectile;
 using UnityEngine.AddressableAssets;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.Equipment.Elites
 {
@@ -64,8 +65,7 @@ namespace StormSurge.Equipment.Elites
         public class StormAffixComponent : MonoBehaviour
         {
             private readonly BullseyeSearch search = new BullseyeSearch();
-            private static GameObject? _stuporWard;
-            public static GameObject? stuporWard => _stuporWard ??= Assets.AssetBundle.LoadAsset<GameObject>("StuporField.prefab");
+            public static InstRef<GameObject> stuporWard = new(() => Assets.AssetBundle.LoadAsset<GameObject>("StuporField.prefab"));
 
             public GameObject? stuporInstance;
             Coroutine? lightningRoutine;
@@ -74,7 +74,7 @@ namespace StormSurge.Equipment.Elites
             void Start()
             {
                 body = GetComponent<CharacterBody>();
-                stuporInstance = Instantiate(stuporWard, gameObject.transform);
+                stuporInstance = Instantiate((GameObject) stuporWard, gameObject.transform);
                 stuporInstance!.GetComponent<TeamFilter>().teamIndex = body.teamComponent.teamIndex;
                 //Debug.LogWarning($"STORMSURGE :: instantiated {stuporInstance}");
                 lightningRoutine = StartCoroutine(TickLightning(duration));

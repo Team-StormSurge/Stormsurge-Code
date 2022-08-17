@@ -210,7 +210,7 @@ namespace StormSurge.Interactables
             int ind = Array.FindIndex(selection.categories, (item) => item.name.Equals("Shrines", StringComparison.OrdinalIgnoreCase));
             selection.AddCard(ind, dCard);
         }
-        static InstReference<EquipmentDef> StormingDef = new
+        static InstRef<EquipmentDef> StormingDef = new
             (() => Assets.ContentPack.equipmentDefs.Find("edAffixStorming"));
         public static void OnSpawnedServerGlobal(SpawnCard.SpawnResult result)
         {
@@ -367,6 +367,7 @@ namespace StormSurge.Interactables
         }
         void AddStormPostProcessing()
         {
+            if (stormEvent == null) return;
             var rainPP = Instantiate(stormEvent?.postProcessingVolume);
             rainPP.GetComponent<PostProcessVolume>().priority = ppVolume.priority + 1;
             NetworkServer.Spawn(rainPP);

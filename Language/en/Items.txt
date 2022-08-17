@@ -35,5 +35,10 @@
 		"ITEM_HUNTER_SHIELDTALON_PICKUP" : "Learn how machines enact revenge.",
 		"ITEM_HUNTER_SHIELDTALON_DESC" : "placeholder",
 		"ITEM_HUNTER_SHIELDTALON_LORE" : "placeholder"
+
+		"ITEM_SS_GABESCOIN_NAME" : "Gabriel's Coin",
+		"ITEM_SS_GABESCOIN_PICKUP" : "Your attacks have a chance to ricochet to new enemies.",
+		"ITEM_SS_GABESCOIN_DESC" : "placeholder",
+		"ITEM_SS_GABESCOIN_LORE" : "placeholder"
 	}
 }

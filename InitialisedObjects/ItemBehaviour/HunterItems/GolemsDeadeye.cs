@@ -13,9 +13,9 @@ namespace StormSurge.ItemBehaviour
     class GolemsDeadeye : ItemBase
     {
         #region LoadedContent
-        static InstReference<BuffDef> DeadeyeEffect = new
+        static InstRef<BuffDef> DeadeyeEffect = new
             (() => Assets.ContentPack.buffDefs.Find("DeadeyeEffect"));
-        static InstReference<NetworkSoundEventDef> DeadeyeEffectSound = new
+        static InstRef<NetworkSoundEventDef> DeadeyeEffectSound = new
             (() => Assets.ContentPack.networkSoundEventDefs.Find("nseGolemsDeadeyeEffect"));
         #endregion
         protected override string itemDefName => "GolemsDeadeye";

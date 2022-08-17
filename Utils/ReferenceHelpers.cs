@@ -4,10 +4,10 @@ using System.Text;
 
 namespace StormSurge.Utils.ReferenceHelper
 {
-    public class InstReference<T> where T : class?
+    public class InstRef<T> where T : class?
     {
         Func<T> refMethod;
-        public InstReference(Func<T> RefMethod)
+        public InstRef(Func<T> RefMethod)
         {
             this.refMethod = RefMethod;
         }
@@ -26,13 +26,13 @@ namespace StormSurge.Utils.ReferenceHelper
             private set
             {_backingField = value;}
         }
-        public static implicit operator T(InstReference<T> self)
+        public static implicit operator T(InstRef<T> self)
         {
             return self.Reference;
         }
-        public static implicit operator InstReference<T>(Func<T> newMethod)
+        public static implicit operator InstRef<T>(Func<T> newMethod)
         {
-            return new InstReference<T>(newMethod);
+            return new InstRef<T>(newMethod);
         }
     }
 }

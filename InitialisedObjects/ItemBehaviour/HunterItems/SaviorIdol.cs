@@ -12,9 +12,9 @@ namespace StormSurge.ItemBehaviour
     class SaviorIdol : ItemBase
     {
         #region LoadedContent
-        static InstReference<BuffDef> SaviorEffect = new
+        static InstRef<BuffDef> SaviorEffect = new
             (() => Assets.ContentPack.buffDefs.Find("SaviorEffect"));
-        static InstReference<NetworkSoundEventDef> SaviorEffectSound = new
+        static InstRef<NetworkSoundEventDef> SaviorEffectSound = new
             (() => Assets.ContentPack.networkSoundEventDefs.Find("nseSaviorEffect"));
         #endregion
 
