@@ -25,9 +25,9 @@ namespace StormSurge.ScriptableObjects.TierDef
 
 		public static void Init(StormsurgeContentPack contentPack)
 		{
+			AddNewColor();
 		}
 
-		[HarmonyPostfix, HarmonyPatch(typeof(ColorCatalog), MethodType.StaticConstructor)]
 		public static void AddNewColor()
 		{
 			var len = ColorCatalog.indexToColor32.Length;
