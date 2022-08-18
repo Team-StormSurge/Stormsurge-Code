@@ -11,6 +11,7 @@ using MonoMod.Cil;
 using System.Text;
 using UnityEngine;
 using UnityEngine.Networking;
+using System.Collections;
 
 namespace StormSurge.ItemBehaviour
 {
@@ -63,9 +64,9 @@ namespace StormSurge.ItemBehaviour
         public static void PatchHealOccupants(HealingWard __instance)
         {
 			//this will work
-			//var mComp = __instance.GetComponent<CorruptHealComponent>();
+			var mComp = __instance.GetComponent<CorruptHealComponent>();
 			//this, however, will not. How does one access a patch-time field?
-			var mComp = ((patch_HealingWard) __instance).malignComponent;
+			//var mComp = ((patch_HealingWard) __instance).malignComponent;
 			float num = __instance.radius * __instance.radius;
 			Vector3 position = __instance.transform.position; 
 			for (TeamIndex teamIndex = TeamIndex.Neutral; teamIndex < TeamIndex.Count; teamIndex += 1)
@@ -76,7 +77,7 @@ namespace StormSurge.ItemBehaviour
 					if ((teamMember.transform.position - position).sqrMagnitude <= num)
 					{
 						HealthComponent hComp = teamMember.GetComponent<HealthComponent>();
-						if (hComp)
+						if (hComp)	
 						{
 							//Debug.LogWarning($"{teamIndex} vs {__instance.teamFilter.teamIndex}");
 							if (teamIndex != __instance.teamFilter.teamIndex && mComp)
@@ -85,7 +86,7 @@ namespace StormSurge.ItemBehaviour
 								//TODO MAKE THIS CONTROLLED BY CONFIG
 								(10 + (4 * mComp.stackSize)) * __instance.interval, default, hComp.transform.position);
 							}
-							else
+							else if(!mComp)
                             {
 								CharacterBody charBod = hComp.body;
 								//Debug.Log(charBod);
@@ -132,13 +133,16 @@ namespace StormSurge.ItemBehaviour
 	[RequireComponent(typeof(TeamFilter))]
 	public class CorruptHealComponent : MonoBehaviour
     {
+		public float lerpTime = 3f;
+
 		InstRef<Material> evilShroomMat = new(() => Assets.AssetBundle.LoadAsset<Material>("matEvilShroomIndicator.mat"));
+		InstRef<GameObject> spawnEffect = new(() => LegacyResourcesAPI.Load<GameObject>("Prefabs/TemporaryVisualEffects/DeathMarkEffect"));
 		//TeamFilter filter; do we need this??
 		public CharacterBody owner;
 		public int stackSize;
 		void Start()
-        {
-			GetComponent<HealingWard>().rangeIndicator.GetComponentInChildren<Renderer>().material = evilShroomMat;
-        }
+		{
+			GetComponentInChildren<Renderer>().SetMaterial(evilShroomMat);
+		}
     }
 }

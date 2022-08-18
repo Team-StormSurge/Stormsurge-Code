@@ -19,7 +19,7 @@ namespace StormSurge.Utils.ReferenceHelper
                 if (_backingField == default)
                 {
                     _backingField = refMethod();
-                    UnityEngine.Debug.LogWarning($"{_backingField} is being initialised; was {default(T)?.ToString() ?? "null"}");
+                    //UnityEngine.Debug.LogWarning($"{_backingField} is being initialised; was {default(T)?.ToString() ?? "null"}");
                 }
                 return _backingField;
             }
