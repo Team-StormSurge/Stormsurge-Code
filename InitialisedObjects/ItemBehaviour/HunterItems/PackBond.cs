@@ -5,31 +5,16 @@ using Mono.Cecil;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
-using static StormSurge.Utils.LanguageProvider;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.ItemBehaviour
 {
     class PackBond : ItemBase
     {
         #region LoadedContent
-        static NetworkSoundEventDef? _packBondBlockSound;
-        static NetworkSoundEventDef PackBondBlockSound
-        {
-            get
-            {
-                _packBondBlockSound ??= Assets.ContentPack.networkSoundEventDefs.Find("nsePackBondBlock");
-                return _packBondBlockSound;
-            }
-        }
+        static InstRef<NetworkSoundEventDef> PackBondBlockSound = new
+            (() => Assets.ContentPack.networkSoundEventDefs.Find("nsePackBondBlock"));
         #endregion
-        static string prefix = "ITEM_HUNTER_" + "PACKBOND";
-        protected override ItemLanguage lang => new()
-        {
-            nameToken = new LanguagePair($"{prefix}_NAME", "Pack Bond"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "Grant flat damage reduction to all allies."),
-            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
-            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
-        };
         protected override string itemDefName => "PackBond";
         protected override string configName => "Pack Bond";
         public override void AddItemBehaviour()
@@ -49,9 +34,7 @@ namespace StormSurge.ItemBehaviour
         public static void IlTakeDamage(ILContext il)
         {
             var c = new ILCursor(il);
-            c.GotoNext(MoveType.Before, x => x.MatchLdfld<HealthComponent.ItemCounts>(nameof(HealthComponent.ItemCounts.armorPlate))/*,
-                x => x.MatchCallOrCallvirt(out _),
-                x => x.MatchStloc(out _)*/);
+            c.GotoNext(MoveType.Before, x => x.MatchLdfld<HealthComponent.ItemCounts>(nameof(HealthComponent.ItemCounts.armorPlate)));
             var where = c.Index;
             int num = -1;
             c.GotoNext(x => x.MatchLdloc(out num));
@@ -72,7 +55,7 @@ namespace StormSurge.ItemBehaviour
                 //int itemCount = self.body.inventory.GetItemCount(initialised!.itemDef);
                 float damageReduc = itemCount * initialised!.armorPerAlly!.Value;
                 amount = UnityEngine.Mathf.Max(1f, amount - damageReduc);
-                if(itemCount > 0) RoR2.Audio.EntitySoundManager.EmitSoundServer(PackBondBlockSound.index, self.body.gameObject);
+                if(itemCount > 0) RoR2.Audio.EntitySoundManager.EmitSoundServer(PackBondBlockSound.Reference.index, self.body.gameObject);
                 return amount;
             });
             c.Emit(OpCodes.Stloc, num);

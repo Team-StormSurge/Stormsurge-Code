@@ -1,0 +1,10 @@
+{
+	"strings":
+	{
+		"SS_EQUIP_AFFIXSTORM_NAME" : "Overlord's Descent",
+        "SS_EQUIP_AFFIXSTORM_PICKUP" : "Become an aspect of Maelstrom.",
+        "SS_EQUIP_AFFIXSTORM_DESC" : "placeholder",
+        "SS_EQUIP_AFFIXSTORM_LORE" : "placeholder",
+        "SS_AFFIX_STORM_MODIFIER" : "Storming {0}"
+	}
+}

@@ -14,13 +14,12 @@ using SearchableAttribute = HG.Reflection.SearchableAttribute;
 namespace StormSurge
 {
 	//[BepInDependency(R2API.R2API.PluginGUID)]
-	[BepInDependency("com.xoxfaby.BetterAPI", BepInDependency.DependencyFlags.HardDependency)]
 	[BepInPlugin(MOD_GUID, MOD_NAME, MOD_VERSION)]
 	public class StormSurgePlugin : BaseUnityPlugin
 	{
 		public const string MOD_GUID = "teamstormsurge.stormsurge";
 		public const string MOD_NAME = "StormSurge";
-		public const string MOD_VERSION = "0.5.0";
+		public const string MOD_VERSION = "0.5.25";
 
 		public static StormSurgePlugin? instance;
 		public static bool INSTALLED_BETTERUI;
@@ -43,6 +42,7 @@ namespace StormSurge
 			Assets.Init(harmony);
 
 			new PatchClassProcessor(harmony, typeof(TierDefProvider)).Patch();
+
 		}
 	}
 }

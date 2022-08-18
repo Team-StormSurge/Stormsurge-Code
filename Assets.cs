@@ -1,4 +1,5 @@
 ﻿using System.Collections;
+using System.IO;
 using System.Reflection;
 using HarmonyLib;
 using RoR2.ContentManagement;
@@ -19,14 +20,15 @@ namespace StormSurge
 		{
 			var assembly = Assembly.GetCallingAssembly();
 			var location = assembly.Location;
-			AssetBundle = AssetBundle.LoadFromFile(System.IO.Path.Combine(System.IO.Path.GetDirectoryName(location), assetBundleName));
-			
+			AssetBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(location), assetBundleName));
+			RoR2.Language.collectLanguageRootFolders += list => list.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Language");
+
 			// Load serializable contentpack and supply to content manager
 			var scp = AssetBundle.LoadAsset<StormsurgeContentPack>(contentPackName);
 			TierDefProvider.Init(scp);
 			ContentPack = scp.CreateContentPack();
 			ContentManager.collectContentPackProviders += dele => dele(new ContentPackProvider());
-			InitialisedObjects.InitialisedBase.InitialiseAll(harmony);
+			InitialisedBase.InitialiseAll(harmony);
 			ApplyShaders();
 		}
 		public static void ApplyShaders()
@@ -35,11 +37,12 @@ namespace StormSurge
 			var stubString = "StubbedShader";
 			foreach (Material material in materials)
 			{
-				
 				if (material.shader.name.Contains(stubString))
-                {
+				{
 					var unStubbedAddress = material.shader.name.Substring(stubString.Length).ToLower();
 					material.shader = Resources.Load<Shader>("shaders" + unStubbedAddress);
+					if (material.shader.name.ToLowerInvariant().Contains("internalerror"))
+						UnityEngine.Debug.LogWarning($"STORMSURGE : Cannot convert shader : shaders{unStubbedAddress} => {material.shader.name}");
 				}
 			}
 		}

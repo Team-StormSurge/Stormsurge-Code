@@ -6,41 +6,18 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
-using static StormSurge.Utils.LanguageProvider;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.ItemBehaviour
 {
     class GolemsDeadeye : ItemBase
     {
         #region LoadedContent
-        static BuffDef? _deadeyeEffect;
-        static BuffDef DeadeyeEffect
-        {
-            get
-            {
-                _deadeyeEffect ??= Assets.ContentPack.buffDefs.Find("DeadeyeEffect");
-                return _deadeyeEffect;
-            }
-        }
-
-        static NetworkSoundEventDef? _deadeyeEffectSound;
-        static NetworkSoundEventDef? DeadeyeEffectSound
-        {
-            get
-            {
-                _deadeyeEffectSound ??= Assets.ContentPack.networkSoundEventDefs.Find("nseGolemsDeadeyeEffect");
-                return _deadeyeEffectSound;
-            }
-        }
+        static InstRef<BuffDef> DeadeyeEffect = new
+            (() => Assets.ContentPack.buffDefs.Find("DeadeyeEffect"));
+        static InstRef<NetworkSoundEventDef> DeadeyeEffectSound = new
+            (() => Assets.ContentPack.networkSoundEventDefs.Find("nseGolemsDeadeyeEffect"));
         #endregion
-        static string prefix = "ITEM_HUNTER_" + "GOLEMEYE";
-        protected override ItemLanguage lang => new()
-        {
-            nameToken = new LanguagePair($"{prefix}_NAME", "Golem's Deadeye"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "Gain power from consistent attacks."),
-            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
-            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
-        };
         protected override string itemDefName => "GolemsDeadeye";
         protected override string configName => "Golem Deadeye";
         public override void AddItemBehaviour()
@@ -109,7 +86,7 @@ namespace StormSurge.ItemBehaviour
             void OnDestroy()
             {
                 GlobalEventManager.onServerDamageDealt -= GlobalEventManager_onServerDamageDealt;
-                if (lastTarget && lastTarget!.body) lastTarget!.body.SetBuffCount(DeadeyeEffect.buffIndex, 0);
+                if (lastTarget && lastTarget!.body) lastTarget!.body.SetBuffCount(DeadeyeEffect.Reference.buffIndex, 0);
             }
 
             private void GlobalEventManager_onServerDamageDealt(DamageReport rep)
@@ -117,7 +94,7 @@ namespace StormSurge.ItemBehaviour
                 if (rep.attackerBody != body) return;
                 if(lastTarget != rep.victim)
                 {
-                    if(lastTarget && lastTarget!.body) lastTarget!.body.SetBuffCount(DeadeyeEffect.buffIndex, 0);
+                    if(lastTarget && lastTarget!.body) lastTarget!.body.SetBuffCount(DeadeyeEffect.Reference.buffIndex, 0);
                     lastTarget = rep.victim;
                 }
                 if(lastTarget)

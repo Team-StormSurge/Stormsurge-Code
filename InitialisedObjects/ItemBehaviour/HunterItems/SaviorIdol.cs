@@ -5,41 +5,18 @@ using BepInEx.Configuration;
 using HarmonyLib;
 using RoR2;
 using RoR2.Items;
-using static StormSurge.Utils.LanguageProvider;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.ItemBehaviour
 {
     class SaviorIdol : ItemBase
     {
         #region LoadedContent
-        static BuffDef? _saviorEffect;
-        static BuffDef SaviorEffect
-        {
-            get
-            {
-                _saviorEffect ??= Assets.ContentPack.buffDefs.Find("SaviorEffect");
-                return _saviorEffect;
-            }
-        }
-
-        static NetworkSoundEventDef? _saviorEffectSound;
-        static NetworkSoundEventDef SaviorEffectSound
-        {
-            get
-            {
-                _saviorEffectSound ??= Assets.ContentPack.networkSoundEventDefs.Find("nseSaviorEffect");
-                return _saviorEffectSound;
-            }
-        }
+        static InstRef<BuffDef> SaviorEffect = new
+            (() => Assets.ContentPack.buffDefs.Find("SaviorEffect"));
+        static InstRef<NetworkSoundEventDef> SaviorEffectSound = new
+            (() => Assets.ContentPack.networkSoundEventDefs.Find("nseSaviorEffect"));
         #endregion
-        static string prefix = "ITEM_HUNTER_" + "SAVIORIDOL";
-        protected override ItemLanguage lang => new()
-        {
-            nameToken = new LanguagePair($"{prefix}_NAME", "Savior Idol"),
-            pickupToken = new LanguagePair($"{prefix}_PICKUP", "In peril, find clarity."),
-            descToken = new LanguagePair($"{prefix}_DESC", "placeholder"),
-            loreToken = new LanguagePair($"{prefix}_LORE", "placeholder"),
-        };
 
         protected override string itemDefName => "SaviorIdol";
         protected override string configName => "Savior Idol";
@@ -50,6 +27,7 @@ namespace StormSurge.ItemBehaviour
 
         private void OnInvChanged(Inventory inv)
         {
+            if (!inv.GetComponent<CharacterMaster>()) return;
             var itemComponent = inv.GetComponent<SaviorIdolBehaviour>();
             if (inv.GetItemCount(itemDef) > 0)
             {
@@ -79,7 +57,8 @@ namespace StormSurge.ItemBehaviour
 
             void Start()
             {
-                master = GetComponent<CharacterMaster>();
+                master = GetComponentInChildren<CharacterMaster>();
+                //UnityEngine.Debug.LogWarning($"STORMSURGE :: {name} HAS COMPONENT {master}");
                 body = master.GetBody();
                 HP = body.healthComponent;
             }
@@ -93,9 +72,10 @@ namespace StormSurge.ItemBehaviour
             float oldHealth;
             void FixedUpdate()
             {
-                master!.luck -= luckBonus;
 
                 if (oldHealth == HP!.health) return;
+
+                master!.luck -= luckBonus;
 
                 oldHealth = HP.health;
                 float healthPercent = (healthThreshold!.Value - (HP.health * 100f / HP.fullHealth));
@@ -106,7 +86,7 @@ namespace StormSurge.ItemBehaviour
 
                 if (luckBonus == finalLuck) return;
 
-                body?.SetBuffCount(SaviorEffect.buffIndex, finalLuck);
+                body?.SetBuffCount(SaviorEffect.Reference.buffIndex, finalLuck);
 
                 /*if(itemComponent.luckBonus < finalLuck)
                 {

@@ -1,0 +1,44 @@
+{
+	"strings":
+	{
+        "ITEM_HUNTER_SAVIORIDOL_NAME" : "Savior Idol",
+		"ITEM_HUNTER_SAVIORIDOL_PICKUP" : "In peril: find clarity.",
+        "ITEM_HUNTER_SAVIORIDOL_DESC" : "placeholder",
+        "ITEM_HUNTER_SAVIORIDOL_LORE" : "placeholder",
+		
+        "ITEM_HUNTER_GOLEMEYE_NAME" : "Golem's Deadeye",
+		"ITEM_HUNTER_GOLEMEYE_PICKUP" : "Beat them like drums.",
+		"ITEM_HUNTER_GOLEMEYE_DESC" : "placeholder",
+		"ITEM_HUNTER_GOLEMEYE_LORE" : "placeholder",
+		
+		"ITEM_HUNTER_PACKBOND_NAME" : "Pack Bond",
+		"ITEM_HUNTER_PACKBOND_PICKUP" : "The hive thrives together.",
+		"ITEM_HUNTER_PACKBOND_DESC" : "placeholder",
+		"ITEM_HUNTER_PACKBOND_LORE" : "placeholder"
+
+		"ITEM_HUNTER_TARHEART_NAME" : "Apothecary Heart",
+		"ITEM_HUNTER_TARHEART_PICKUP" : "Malleable Disease...",
+		"ITEM_HUNTER_TARHEART_DESC" : "placeholder",
+		"ITEM_HUNTER_TARHEART_LORE" : "placeholder"
+
+		"ITEM_HUNTER_EVILSHROOM_NAME" : "Malign Mushroom",
+		"ITEM_HUNTER_EVILSHROOM_PICKUP" : "Their pain is your pleasure.",
+		"ITEM_HUNTER_EVILSHROOM_DESC" : "placeholder",
+		"ITEM_HUNTER_EVILSHROOM_LORE" : "placeholder"
+
+		"ITEM_HUNTER_LESSERSHARDS_NAME" : "Scorched Mask",
+		"ITEM_HUNTER_LESSERSHARDS_PICKUP" : "Go out in a blaze of glory.",
+		"ITEM_HUNTER_LESSERSHARDS_DESC" : "placeholder",
+		"ITEM_HUNTER_LESSERSHARDS_LORE" : "placeholder"
+
+		"ITEM_HUNTER_SHIELDTALON_NAME" : "Wicked Talons",
+		"ITEM_HUNTER_SHIELDTALON_PICKUP" : "Learn how machines enact revenge.",
+		"ITEM_HUNTER_SHIELDTALON_DESC" : "placeholder",
+		"ITEM_HUNTER_SHIELDTALON_LORE" : "placeholder"
+
+		"ITEM_SS_GABESCOIN_NAME" : "Gabriel's Coin",
+		"ITEM_SS_GABESCOIN_PICKUP" : "Your attacks have a chance to ricochet to new enemies.",
+		"ITEM_SS_GABESCOIN_DESC" : "placeholder",
+		"ITEM_SS_GABESCOIN_LORE" : "placeholder"
+	}
+}

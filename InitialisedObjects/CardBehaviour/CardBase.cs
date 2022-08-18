@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace StormSurge.InitialisedObjects.CardBehaviour
+namespace StormSurge.Interactables
 {
     public abstract class CardBase : InitialisedBase
     {
