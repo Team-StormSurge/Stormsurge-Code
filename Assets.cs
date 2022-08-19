@@ -18,9 +18,22 @@ namespace StormSurge
 		static Material[] materials;
 		public static AssetBundle AssetBundle; //reference to our loaded asset bundle
 		public static ContentPack ContentPack; //reference to our loaded content pack
+		public static uint soundbankID; //reference to our loaded soundbank
 		public static string assetBundleName = "stormsurgeassets"; //the name of our asset bundle
 		public static string contentPackName = "stormsurgecontent"; //the name of our content pack
 
+		public static string soundBankName = "StormsurgeSoundbank.bnk"; //the name of our sound bank
+
+		public static string path => Path.GetDirectoryName(Assembly.GetCallingAssembly().Location);
+
+		[RoR2.SystemInitializer]
+		public static void LoadSoundbank()
+        {
+			//load soundbank from file
+			var akResult = AkSoundEngine.AddBasePath(path);
+			akResult = AkSoundEngine.LoadBank(soundBankName, out soundbankID);
+
+		}
 		/// <summary>
 		/// Initialises our asset bundle and content pack at patch-time, then loads all modded behaviours.
 		/// </summary>
@@ -28,9 +41,8 @@ namespace StormSurge
 		public static void Init(Harmony harmony)
 		{
 			//load asset bundle from file
-			var assembly = Assembly.GetCallingAssembly();
-			var location = assembly.Location;
-			AssetBundle = AssetBundle.LoadFromFile(Path.Combine(Path.GetDirectoryName(location), assetBundleName)); 
+
+			AssetBundle = AssetBundle.LoadFromFile(Path.Combine(path, assetBundleName)); 
 			//collects and loads all of our modded language files
 			RoR2.Language.collectLanguageRootFolders += list => list.Add(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "/Language");
 

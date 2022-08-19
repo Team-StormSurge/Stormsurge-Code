@@ -8,6 +8,8 @@ using UnityEngine.Networking;
 using UnityEngine.Rendering.PostProcessing;
 using static StormSurge.Interactables.StormShrineBase;
 using static RoR2.ClassicStageInfo;
+using StormSurge.Utils.ReferenceHelper;
+using RoR2.Audio;
 
 namespace StormSurge.Interactables
 {
@@ -42,13 +44,9 @@ namespace StormSurge.Interactables
         }
         void OnDisable()
         {
-            Stop(); //use this so that we always run cleanup on destroy or disable
-        }
-        void Stop()
-        {
-
             stormActive = false; //disable our storm event and behaviours
             activeEvent = null; //reset the active storm event
+            AkSoundEngine.PostEvent("stop_ShrineThunderLoop", gameObject);
         }
         #endregion
 
@@ -58,6 +56,8 @@ namespace StormSurge.Interactables
         {
             stormActive = true; //enables storm behaviours, etc
             activeEvent = stormEvent; //sets the active storm event
+            PointSoundManager.EmitSoundServer(shrineStartSound.Reference.index, transform.position);
+            AkSoundEngine.PostEvent("start_ShrineThunderLoop", gameObject);
             //FORCE FAMILY EVENT TO START
             ForceFamilyEvent(); //forces the stage to generate a family event from MonsterdccsPool
             if (ActiveFamily == null) //only run if ForceFamilyEvent() has failed
@@ -169,6 +169,7 @@ namespace StormSurge.Interactables
 
 
         //random script values
+        static InstRef<NetworkSoundEventDef> shrineStartSound = new(() => Assets.ContentPack.networkSoundEventDefs.Find("nseShrineStormActivation"));
         private CombatDirector? combatDirector;
         PostProcessVolume ppVolume;
 

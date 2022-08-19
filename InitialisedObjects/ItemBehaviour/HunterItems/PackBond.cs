@@ -66,8 +66,8 @@ namespace StormSurge.ItemBehaviour
                 }
                 float damageReduc = itemCount * initialised!.armorPerAlly!.Value;
                 amount = UnityEngine.Mathf.Max(1f, amount - damageReduc);
-                //current unused; if damage has been reduced, play the Pack Bond sound event.
-                //if(itemCount > 0) RoR2.Audio.EntitySoundManager.EmitSoundServer(PackBondBlockSound.Reference.index, self.body.gameObject);
+                //if damage has been reduced, play the Pack Bond sound event.
+                if(itemCount > 0) RoR2.Audio.EntitySoundManager.EmitSoundServer(((NetworkSoundEventDef)PackBondBlockSound).index, self.body.gameObject);
                 return amount; //returns the modified damage
             });
             c.Emit(OpCodes.Stloc, num); //saves damage dealt as our modified amount.

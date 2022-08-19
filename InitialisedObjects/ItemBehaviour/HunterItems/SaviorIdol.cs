@@ -16,7 +16,7 @@ namespace StormSurge.ItemBehaviour
     {
         #region LoadedContent
         static InstRef<BuffDef> SaviorEffect = new
-            (() => Assets.ContentPack.buffDefs.Find("SaviorEffect"));
+            (() => Assets.ContentPack.buffDefs.Find("bdSaviorLuck"));
         static InstRef<NetworkSoundEventDef> SaviorEffectSound = new
             (() => Assets.ContentPack.networkSoundEventDefs.Find("nseSaviorEffect"));
         #endregion
@@ -106,11 +106,11 @@ namespace StormSurge.ItemBehaviour
 
                 body?.SetBuffCount(((BuffDef) SaviorEffect).buffIndex, finalLuck);
 
-                //unused as of now; play the Savior Idol sound event if our luck has increased on this update (HP has decreased)
-                /*if(itemComponent.luckBonus < finalLuck)
+                //play the Savior Idol sound event if our luck has increased on this update (HP has decreased)
+                if(luckBonus < finalLuck)
                 {
-                    RoR2.Audio.EntitySoundManager.EmitSoundServer(SaviorEffectSound.index, __instance.gameObject);
-                }*/
+                    RoR2.Audio.EntitySoundManager.EmitSoundServer(SaviorEffectSound.Reference.index, body.gameObject);
+                }
 
                 //finalise our luck boost
                 luckBonus = finalLuck;

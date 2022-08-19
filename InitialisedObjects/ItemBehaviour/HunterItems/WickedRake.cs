@@ -5,6 +5,7 @@ using HarmonyLib;
 using Mono.Cecil.Cil;
 using MonoMod.Cil;
 using RoR2;
+using RoR2.Audio;
 using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.ItemBehaviour
@@ -23,7 +24,10 @@ namespace StormSurge.ItemBehaviour
         {}
 
         //the buff effect used by Wicked Rake
+        #region Loaded Content
         static InstRef<BuffDef> WickedRageBuff = new(() => Assets.ContentPack.buffDefs.Find("bdWickedRage"));
+        static InstRef<NetworkSoundEventDef> WickedRageSound = new(() => Assets.ContentPack.networkSoundEventDefs.Find("nseWickedRage"));
+        #endregion Loaded Content
 
         //the Harmony Patch used in CharacterBody.Recalculate stats- this currently boosts Attack Speed if Wicked Rage is active.
         //TODO replace this to affect Critical Chance instead
@@ -69,6 +73,7 @@ namespace StormSurge.ItemBehaviour
                 if (itemCount > 0)
                 {
                     body.AddTimedBuff(WickedRageBuff, 4 + (1 * (itemCount - 1)), 1); //adds Wicked Rage by its effect def
+                    EntitySoundManager.EmitSoundServer(WickedRageSound.Reference.index, __instance.gameObject);
                 }
             }
         }

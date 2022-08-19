@@ -19,7 +19,7 @@ namespace StormSurge.ItemBehaviour
         #region LoadedContent
         //definition for Deadeye Mark debuff
         static InstRef<BuffDef> DeadeyeEffect = new
-            (() => Assets.ContentPack.buffDefs.Find("DeadeyeEffect"));
+            (() => Assets.ContentPack.buffDefs.Find("bdDeadeye"));
         //definition for Deadeye Proc Sound Event
         static InstRef<NetworkSoundEventDef> DeadeyeEffectSound = new
             (() => Assets.ContentPack.networkSoundEventDefs.Find("nseGolemsDeadeyeEffect"));
@@ -71,7 +71,7 @@ namespace StormSurge.ItemBehaviour
                     float percentBoost = initialised.baseDamage!.Value + (initialised.damagePerStack!.Value * itemStack - 1);
                     float finalBoost = percentBoost * buffStack;
                     //emit our Deadeye sound event
-                    //RoR2.Audio.EntitySoundManager.EmitSoundServer(DeadeyeEffectSound!.index, self.body.gameObject);
+                    RoR2.Audio.EntitySoundManager.EmitSoundServer(((NetworkSoundEventDef) DeadeyeEffectSound)!.index, self.body.gameObject);
                     amount *= 1 + (finalBoost / 100);
                 }
                 return amount;

@@ -152,11 +152,19 @@ namespace StormSurge.ItemBehaviour
 				wardInstance ??= Instantiate((GameObject)wardEffect, transform);
 				wardInstance.GetComponent<TeamFilter>().teamIndex = GetComponent<TeamComponent>().teamIndex;
 				wardInstance.GetComponent<HealingWard>().radius = 4 + (1 * stack);
+				AkSoundEngine.PostEvent("Play_item_proc_mushroom_start", gameObject);
+				StartCoroutine(stopSound());
 			}
 			//destroy the healing ward if we lose Malign Mushroom.
-			void OnDestroy()
+			void OnDisable()
 			{
 				Destroy(wardInstance);
+			}
+			IEnumerator stopSound()
+            {
+				yield return new WaitForSeconds(1f);
+				AkSoundEngine.PostEvent("Stop_item_proc_mushroom_loop", gameObject);
+
 			}
 		}
 	}
