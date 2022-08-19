@@ -9,6 +9,10 @@ using UnityEngine.ResourceManagement.AsyncOperations;
 
 namespace Utils
 {
+	/// <summary>
+	/// Bubbet's custom Field Loader; we use this to load addressables into the fields of our GameObjects. Ask Bubbet if you want somebody
+	/// to document this... I'on wanna.
+	/// </summary>
 	[ExecuteAlways]
 	public class FieldLoader : MonoBehaviour
 	{

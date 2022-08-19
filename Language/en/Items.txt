@@ -3,42 +3,77 @@
 	{
         "ITEM_HUNTER_SAVIORIDOL_NAME" : "Savior Idol",
 		"ITEM_HUNTER_SAVIORIDOL_PICKUP" : "In peril: find clarity.",
-        "ITEM_HUNTER_SAVIORIDOL_DESC" : "placeholder",
+        "ITEM_HUNTER_SAVIORIDOL_DESC" : "Below 25% health, gain 1 luck for each subsequent portion of health missing (25% / stack). Caps at 1 per stack.",
         "ITEM_HUNTER_SAVIORIDOL_LORE" : "placeholder",
 		
         "ITEM_HUNTER_GOLEMEYE_NAME" : "Golem's Deadeye",
 		"ITEM_HUNTER_GOLEMEYE_PICKUP" : "Beat them like drums.",
-		"ITEM_HUNTER_GOLEMEYE_DESC" : "placeholder",
+		"ITEM_HUNTER_GOLEMEYE_DESC" : "Consecutive damage dealt to an enemy will Mark them, granting extra x% [y% per stack] damage per hit, per Mark. Caps at 3 Marks [+2 per stack].",
 		"ITEM_HUNTER_GOLEMEYE_LORE" : "placeholder",
 		
 		"ITEM_HUNTER_PACKBOND_NAME" : "Pack Bond",
 		"ITEM_HUNTER_PACKBOND_PICKUP" : "The hive thrives together.",
-		"ITEM_HUNTER_PACKBOND_DESC" : "placeholder",
-		"ITEM_HUNTER_PACKBOND_LORE" : "placeholder"
+		"ITEM_HUNTER_PACKBOND_DESC" : "You, and all allies that you own, gain 5 flat points of damage reduction [+5 per stack].",
+		"ITEM_HUNTER_PACKBOND_LORE" : "placeholder",
 
 		"ITEM_HUNTER_TARHEART_NAME" : "Apothecary Heart",
 		"ITEM_HUNTER_TARHEART_PICKUP" : "Malleable Disease...",
-		"ITEM_HUNTER_TARHEART_DESC" : "placeholder",
-		"ITEM_HUNTER_TARHEART_LORE" : "placeholder"
+		"ITEM_HUNTER_TARHEART_DESC" : "Every 5 seconds [-10% per stack], your next attack grants a random debuff that can be applied on-hit. (caps??)",
+		"ITEM_HUNTER_TARHEART_LORE" : "placeholder",
 
-		"ITEM_HUNTER_EVILSHROOM_NAME" : "Malign Mushroom",
+		"ITEM_HUNTER_EVILSHROOM_NAME" : "Malign Mushrum",
 		"ITEM_HUNTER_EVILSHROOM_PICKUP" : "Their pain is your pleasure.",
-		"ITEM_HUNTER_EVILSHROOM_DESC" : "placeholder",
-		"ITEM_HUNTER_EVILSHROOM_LORE" : "placeholder"
+		"ITEM_HUNTER_EVILSHROOM_DESC" : "Generate a small 4m [+1m per stack] healing field around you. All healing fields you touch will additionally damage enemies.",
+		"ITEM_HUNTER_EVILSHROOM_LORE" : "placeholder",
 
 		"ITEM_HUNTER_LESSERSHARDS_NAME" : "Scorched Mask",
-		"ITEM_HUNTER_LESSERSHARDS_PICKUP" : "Go out in a blaze of glory.",
-		"ITEM_HUNTER_LESSERSHARDS_DESC" : "placeholder",
-		"ITEM_HUNTER_LESSERSHARDS_LORE" : "placeholder"
+		"ITEM_HUNTER_LESSERSHARDS_PICKUP" : "Go out in a blaze of glory...",
+		"ITEM_HUNTER_LESSERSHARDS_DESC" : "Ignite yourself whenever you reach low health. Additionally, burn effects heal you for 0% [+30% per stack] of their base damage.",
+		"ITEM_HUNTER_LESSERSHARDS_LORE" : "placeholder",
+
+		"ITEM_HUNTER_GREATERSHARDS_NAME" : "Greater Shards",
+		"ITEM_HUNTER_GREATERSHARDS_PICKUP" : "... and drag them down with you.",
+		"ITEM_HUNTER_GREATERSHARDS_DESC" : "Striking enemies has a 10% chance to Root and Chain them, immobilising them and dragging them to the floor at 100% [+100% per stack] speed.",
+		"ITEM_HUNTER_GREATERSHARDS_LORE" : "placeholder",
 
 		"ITEM_HUNTER_SHIELDTALON_NAME" : "Wicked Talons",
 		"ITEM_HUNTER_SHIELDTALON_PICKUP" : "Learn how machines enact revenge.",
-		"ITEM_HUNTER_SHIELDTALON_DESC" : "placeholder",
-		"ITEM_HUNTER_SHIELDTALON_LORE" : "placeholder"
+		"ITEM_HUNTER_SHIELDTALON_DESC" : "When your shield breaks, recieve a 50% [+10% per stack] boost to critical strike chance for 5 seconds [+1 per stack].",
+		"ITEM_HUNTER_SHIELDTALON_LORE" : "placeholder",
+
+		"ITEM_HUNTER_ACIDSADDLE_NAME" : "Fizzling Saddle",
+		"ITEM_HUNTER_ACIDSADDLE_PICKUP" : "Your attacks may melt foes.",
+		"ITEM_HUNTER_ACIDSADDLE_DESC" : "Your attacks have a 15% chance to apply 1 instance of Blight or Poison. This effect repeats once per stack.",
+		"ITEM_HUNTER_ACIDSADDLE_LORE" : "placeholder",
+
+		"ITEM_HUNTER_GUPCUBE_NAME" : "Stabbing Gel",
+		"ITEM_HUNTER_GUPCUBE_PICKUP" : "Retaliate against nearby attackers.",
+		"ITEM_HUNTER_GUPCUBE_DESC" : "Attacks have a 10% chance to be blocked, and a 15% chance [+15% per stack] to damage and stun the attacker. NOT AFFECTED BY LUCK.",
+		"ITEM_HUNTER_GUPCUBE_LORE" : "placeholder",
+
+		"ITEM_HUNTER_IMPSTALKS_NAME" : "Hiding Stalks",
+		"ITEM_HUNTER_IMPSTALKS_PICKUP" : "Strike them blind.",
+		"ITEM_HUNTER_IMPSTALKS_DESC" : "On dealing 300% or more base damage [-25% per stack] in one hit, become invisible for 5 seconds. Recharges 10 seconds later.",
+		"ITEM_HUNTER_IMPSTALKS_LORE" : "placeholder",
+
+		"ITEM_HUNTER_JELLYSEED_NAME" : "Bolt Ephyra",
+		"ITEM_HUNTER_JELLYSEED_PICKUP" : "Smite your foes.",
+		"ITEM_HUNTER_JELLYSEED_DESC" : "On recieving damage, stick a bolt to yourself that will explode for 180% base damage in a 4m area [+2m per stack], after a short delay.",
+		"ITEM_HUNTER_JELLYSEED_LORE" : "placeholder",
+
+		"ITEM_HUNTER_LUNARSOUL_NAME" : "Faded Soul",
+		"ITEM_HUNTER_LUNARSOUL_PICKUP" : "Anything Broken can be remade.",
+		"ITEM_HUNTER_LUNARSOUL_DESC" : "Single attacks cannot deal more than 35% of your Max HP.",
+		"ITEM_HUNTER_LUNARSOUL_LORE" : "placeholder",
+
+		"ITEM_HUNTER_MINICONSTRUCT_NAME" : "Omicron Cell",
+		"ITEM_HUNTER_MINICONSTRUCT_PICKUP" : "Gain an alien bastion.",
+		"ITEM_HUNTER_MINICONSTRUCT_DESC" : "placeholder: Gain 1 small orbital probe [+1 per stack, up to 4 total] with 100% attack speed [+50% per stack] that will attack nearby enemies with bouncing projectiles.",
+		"ITEM_HUNTER_MINICONSTRUCT_LORE" : "placeholder",
 
 		"ITEM_SS_GABESCOIN_NAME" : "Gabriel's Coin",
-		"ITEM_SS_GABESCOIN_PICKUP" : "Your attacks have a chance to ricochet to new enemies.",
+		"ITEM_SS_GABESCOIN_PICKUP" : "Your attacks may ricochet to new enemies.",
 		"ITEM_SS_GABESCOIN_DESC" : "placeholder",
-		"ITEM_SS_GABESCOIN_LORE" : "placeholder"
+		"ITEM_SS_GABESCOIN_LORE" : "placeholder",
 	}
 }

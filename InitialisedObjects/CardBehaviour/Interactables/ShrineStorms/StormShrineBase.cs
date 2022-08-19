@@ -21,6 +21,9 @@ using static StormSurge.Interactables.StormShrineBase;
 
 namespace StormSurge.Interactables
 {
+    /// <summary>
+    /// the InteractableBehaviour that controls the Shrine of Storms, a rare shrine that activates unique stage-specific events.
+    /// </summary>
     public class StormShrineBase : CardBase, ISceneVariant
     {
         protected override string configName => "Shrine of Storms";
@@ -29,8 +32,11 @@ namespace StormSurge.Interactables
         public SceneVariantList SceneVariants => Assets.AssetBundle.LoadAsset<SceneVariantList>("ShrineStormVariants.asset");
         protected override void AddCard()
         {
+            //add listener to Scene Director to pass our card selection
             SceneDirector.onGenerateInteractableCardSelection += (this as ISceneVariant).AddVariantToDirector;
         }
+        //list of subtitles for Storming Elite boss bars--
+        //TODO make this into a separate file/object for code brevity! 
         static Dictionary<string, string> subtitles = new()
         {
             ["FAMILY_GOLEM"] = "SS_SUBTITLE_GOLEMFAMILY",
@@ -48,40 +54,54 @@ namespace StormSurge.Interactables
             ["FAMILY_VOID"] = "SS_SUBTITLE_VOIDFAMILY",
 
         };
+        /// <summary>
+        /// Tries to find a subtitle replacement based on the active Family Event
+        /// </summary>
+        /// <param name="result">the string modified to match our Subtitle result, if successful</param>
+        /// <returns>whether or not a subtitle was successfully found</returns>
         public static bool FindSubtitle(out string result)
         {
             result = "";
             var success = subtitles.TryGetValue(StormShrineBase.ActiveFamily.selectionChatString, out result);
-            //Debug.LogWarning($"Current family token is {CurrentFamilyToken}; Success = {success}; result is {result}; final value is {final}");
+            ///Debug.LogWarning($"Current family token is {CurrentFamilyToken}; Success = {success}; result is {result}; final value is {final}");
             if (success)
             {
                 result = Language.GetString(result);
             }
             return success;
         }
+        /// <summary>
+        /// Finds whether a given CharacterBody is included in our family event.
+        /// </summary>
+        /// <param name="body">The body we are checking for a match.</param>
+        /// <returns>whether the active Family Event contains the given body.</returns>
         static bool FamilyHasBody(CharacterBody body)
         {
-            var selection = StormShrineBase.ActiveFamily;
-            if (selection?.categories == default) return false;
+            var selection = ActiveFamily;
+            if (selection?.categories == default) return false; //skips this code if no family is active, or if it has no selection categories
             foreach(Category category in selection.categories)
             {
-                foreach(DirectorCard card in category.cards)
+                foreach(DirectorCard card in category.cards) //loops for all monster cards in our family event
                 {
                     var comparisonMaster = card.spawnCard.prefab.GetComponentInChildren<CharacterMaster>();
                     var master = body?.master;
                     if (!comparisonMaster || !master) continue;
-                    //Debug.LogWarning($"Comparing master indices {(int)comparisonMaster.masterIndex} ({comparisonMaster.name}) & {(int)master!.masterIndex} ({master.name})");
+                    ///Debug.LogWarning($"Comparing master indices {(int)comparisonMaster.masterIndex} ({comparisonMaster.name}) & {(int)master!.masterIndex} ({master.name})");
                     if ((int) comparisonMaster.masterIndex == (int) master.masterIndex)
                     {
-                        //Debug.LogWarning($"{master.name} will be a Storming Elite!");
-                        return true;
+                        ///Debug.LogWarning($"{master.name} will be a Storming Elite!");
+                        return true; //returns true if we find a match
                     }
                 }
             }
-            return false;
+            return false; //returns false as last resort
         }
 
         public delegate string RebuildSubtitle(string str, BossGroup group, ref BossMemory memory);
+
+        /* our Harmony IL patch for BossGroup.UpdateObservations, used to replace the subtitles on boss bars
+        *  I'm lazy, so I'm not doing a walkthrough of this code- if you need to learn more about IL hooking, 
+        *  check our other shit, or just ask me*/
         [HarmonyILManipulator, HarmonyPatch(typeof(BossGroup), nameof(BossGroup.UpdateObservations))]
         public static void ILOverrideSubtitle(ILContext il)
         {
@@ -98,20 +118,23 @@ namespace StormSurge.Interactables
 
             curs.EmitDelegate<RebuildSubtitle>((string str, BossGroup group, ref BossMemory memory) =>
             {
-                //Debug.LogWarning(str);
+                ///Debug.LogWarning(str);
                 if (!ShrineStormBehavior.stormActive || !FamilyHasBody(memory.cachedBody)) return str;
                 string result = "";
                 var success = FindSubtitle(out result);
                 if (!success) return str;
 
                 return result + " ";
-            }); // was curs.Next.Operand = mRef;
+            }); /// was curs.Next.Operand = mRef;
 
-            //Debug.LogWarning($"\n{il}");
+            ///Debug.LogWarning($"\n{il}");
 
 
 
         }
+
+        /* Our Harmony IL Patch for VisionLimitEffect.UpdateCommandBuffer, used to replace the default black colour with our storm's custom
+        *  colour */
         [HarmonyILManipulator, HarmonyPatch(typeof(VisionLimitEffect), nameof(VisionLimitEffect.UpdateCommandBuffer))]
         public static void ChangeBlindColor(ILContext il)
         {
@@ -124,21 +147,30 @@ namespace StormSurge.Interactables
                 return color;
             });
         }
+
+        /// <summary>
+        /// Replaces the given CategorySelection with a family Event version, if possible
+        /// </summary>
+        /// <param name="oldSelection">The default card selection originally used on this stage.</param>
+        /// <param name="randomNext">the seed used for random number generation</param>
+        /// <param name="info">the current ClassicStageInfo in this run</param>
+        /// <returns>A new Family Event card selection if found, otherwise, oldSelection</returns>
         public static DirectorCardCategorySelection evalFamily(DirectorCardCategorySelection oldSelection, float randomNext, ClassicStageInfo info)
         {
-            //Debug.LogWarning($"Method has selection {oldSelection}, float {randomNext}, and info {info}");
-            //Debug.LogWarning("Rebuilding cards, checking if storm is active");
-            if (ShrineStormBehavior.stormActive)
+            ///Debug.LogWarning($"Method has selection {oldSelection}, float {randomNext}, and info {info}");
+            ///Debug.LogWarning("Rebuilding cards, checking if storm is active");
+            if (ShrineStormBehavior.stormActive) //only run this code if a storm is active
             {
-                Debug.LogWarning("Storm is active! Finding Family dccs category!");
-                var selection = new WeightedSelection<DirectorCardCategorySelection>(8);
+                ///Debug.LogWarning("Storm is active! Finding Family dccs category!"); 
+                var selection = new WeightedSelection<DirectorCardCategorySelection>(8); //generate a new selection from our card selection
+                //grabs any options that are considered family pools
                 var options = info.monsterDccsPool.poolCategories.Where((category) => category.name.Equals("Family", StringComparison.OrdinalIgnoreCase)).FirstOrDefault().includedIfConditionsMet;
-                foreach (var option in options)
+                foreach (var option in options) //loops for all options in our Family Pool list
                 {
                     selection.AddChoice(option.dccs, option.weight);
                 }
-                var eval = selection?.Evaluate(randomNext);
-                if (eval && eval is FamilyDirectorCardCategorySelection)
+                var eval = selection?.Evaluate(randomNext); //evaluates for a random choice of Family Event
+                if (eval && eval is FamilyDirectorCardCategorySelection) //only runs if we were able to evaluate a Family Card Selection
                 {
                     var final = eval as FamilyDirectorCardCategorySelection;
                     if (final != null)
@@ -147,11 +179,13 @@ namespace StormSurge.Interactables
                         return final;
                     }
                 }
-                Debug.LogError($"Could not find family pool! Returning to non-storm behaviours!");
+                ///Debug.LogError($"Could not find family pool! Returning to non-storm behaviours!");
             }
-            Debug.LogWarning("Not storming- returning default selection instead! :: " + oldSelection);
-            return oldSelection;
+            ///Debug.LogWarning("Not storming- returning default selection instead! :: " + oldSelection);
+            return oldSelection; //return oldSelection if no family could be generated
         }
+
+        //Harmony IL patch for ClassicStageInfo.RebuildCards, to force a family event if a storm is active
         [HarmonyILManipulator, HarmonyPatch(typeof(ClassicStageInfo), nameof(ClassicStageInfo.RebuildCards))]
         public static void ILRebuildCards(ILContext il)
         {
@@ -169,8 +203,10 @@ namespace StormSurge.Interactables
             curs.Emit(next.OpCode, next.Operand);
             curs.Emit(OpCodes.Ldarg_0);
             curs.Emit(OpCodes.Call, AccessTools.DeclaredMethod(typeof(StormShrineBase),nameof(StormShrineBase.evalFamily)));
-            //Debug.LogWarning(il + "\n\n");
+            ///Debug.LogWarning(il + "\n\n");
         }
+
+        //Harmony IL patch for CategorySelection.IsAvailable, to remove stage completion limits on a selected family event
         [HarmonyILManipulator, HarmonyPatch(typeof(FamilyDirectorCardCategorySelection),nameof(FamilyDirectorCardCategorySelection.IsAvailable))]
         public static void ILIsAvailable(ILContext il)
         {
@@ -183,6 +219,7 @@ namespace StormSurge.Interactables
             curs.EmitDelegate<Func<int, int>>(val => int.MaxValue);
 
         }
+        //OLD FAMILY EVENT PATCH; OBSOLETE
         /*[HarmonyILManipulator, HarmonyPatch(typeof(ClassicStageInfo), nameof(ClassicStageInfo.RebuildCards))]
         public static void ILRebuildCards(ILContext il)
         {
@@ -204,6 +241,8 @@ namespace StormSurge.Interactables
             });
             //Debug.LogWarning(il);
         }*/
+        
+        //event listener for card collection on stage load, used to add Shrine of Storms to stage
         private void SceneDirector_onGenerateInteractableCardSelection(SceneDirector dir, DirectorCardCategorySelection selection)
         {
             DirectorCard dCard = new();
@@ -212,6 +251,8 @@ namespace StormSurge.Interactables
         }
         static InstRef<EquipmentDef> StormingDef = new
             (() => Assets.ContentPack.equipmentDefs.Find("edAffixStorming"));
+
+        //event listener for enemy spawning ingame, used to force Storming Elites during storms
         public static void OnSpawnedServerGlobal(SpawnCard.SpawnResult result)
         {
             //Debug.LogWarning($"Spawned instance is {result.spawnedInstance}");
@@ -232,182 +273,6 @@ namespace StormSurge.Interactables
             }
         }
 
-        public static FamilyDirectorCardCategorySelection ActiveFamily;
-    }
-    [CreateAssetMenu(menuName = "Stormsurge/Storm Event")]
-    public class StormEvent : UnityEngine.ScriptableObject
-    {
-        [Header("Main Properties")]
-
-        [Tooltip("The biome-specific token for the storm event.")]
-        public string? startMessageToken;
-
-        [Tooltip("The Particle Systems created.")]
-        public GameObject? stormEffect;
-
-        [Tooltip("The PP Volume added.")]
-        public GameObject? postProcessingVolume;
-
-        [Tooltip("Defines the storm's wet-ground material.")][Obsolete]
-        public Material? StormMaterial;
-
-        [Space(height: 2)]
-        [Header("Fog Properties")]
-
-        [Tooltip("Controls the colour of the blindness effect.")]
-        public Color fogColour;
-
-        [Tooltip("The distance at which blindness fog renders.")]
-        public int fogDistance;
-    }
-
-    [RequireComponent(typeof(CombatDirector), typeof(StormItemsBehavior))]
-    public class ShrineStormBehavior : NetworkBehaviour
-    {
-        private float monsterCredit
-        {
-            get
-            {
-                return baseMonsterCredit * Stage.instance.entryDifficultyCoefficient;
-            }
-        }
-
-        #region Unity Methods
-        void Awake()
-        {
-            familyChanceBase = monsterFamilyChance;
-        }
-        private void Start()
-        {
-            if (!NetworkServer.active) return;
-            //Debug.LogWarning($"STORMSURGE : Shrine {gameObject.name} loaded!!");
-            ppVolume = FindObjectsOfType<PostProcessVolume>().Where(x => x.isGlobal == true).ToArray().First();
-            combatDirector = GetComponent<CombatDirector>();
-            SpawnCard.onSpawnedServerGlobal += StormShrineBase.OnSpawnedServerGlobal;
-            /*GetComponent<CombatSquad>().onMemberAddedServer += (CharacterMaster master) =>
-            {
-                Debug.LogWarning($"COMBAT SQUAD ADDED {master.GetBody().name}");
-            };*/
-        }
-        void OnDestroy()
-        {
-            Stop();
-        }
-        void Stop()
-        {
-
-            stormActive = false;
-            activeEvent = null;
-        }
-        #endregion
-
-        #region Storm Inst
-        [Server]
-        public void AddShrineStack(Interactor interactor)
-        {
-            stormActive = true;
-            activeEvent = stormEvent;
-            //FORCE FAMILY EVENT TO START
-            ForceFamilyEvent();
-            if (ActiveFamily == null)
-            {
-                Debug.LogError($"No Family event found! This is either a hidden realm, or ya fucked up big-time, cuz!");
-                return;
-            }
-
-            //BROADCAST STORM
-            Chat.SendBroadcastChat(new Chat.SimpleChatMessage
-            {
-                baseToken = stormEvent?.startMessageToken
-            });
-
-            //Add PP (fog, blindness, etc), and wind
-            AddStormPostProcessing();
-            AddStormWind();
-            AddVisionLimit();
-
-            AddStormWetGround();
-            AddStormParticles();
-
-            //Spawn storming elite squad
-            AddStormElites(interactor);
-
-        }
-        void AddVisionLimit()
-        {
-
-            var bodies = FindObjectsOfType<CharacterBody>();
-            foreach(CharacterBody body in bodies)
-            {
-                body.baseVisionDistance = stormEvent.fogDistance;
-            }
-        }
-        void AddStormParticles()
-        {
-            if(stormEvent?.stormEffect)
-            {
-                EffectManager.SpawnEffect(stormEvent?.stormEffect, new()
-                {
-                    origin = transform.position
-                }, NetworkServer.active);
-            }
-        }
-        void AddStormWetGround()
-        {
-            Debug.LogWarning($"STORMSURGE [WET GROUND] not been implemented!");
-        }
-        void AddStormWind()
-        {
-            var wind = FindObjectsOfType<WindZone>().FirstOrDefault();
-            if (!wind) return;
-            wind.windMain *= 4;
-            wind.windPulseMagnitude *= 2;
-            wind.windPulseFrequency *= 1.5f;
-            wind.windTurbulence *= 1.5f;
-        }
-        void AddStormPostProcessing()
-        {
-            if (stormEvent == null) return;
-            var rainPP = Instantiate(stormEvent?.postProcessingVolume);
-            rainPP.GetComponent<PostProcessVolume>().priority = ppVolume.priority + 1;
-            NetworkServer.Spawn(rainPP);
-            //Debug.LogWarning($"STORMSURGE: post process has original priority of {ppVolume.priority}");
-        }
-        void ForceFamilyEvent()
-        {
-
-            monsterFamilyChance = 100f;
-            foreach (CombatDirector director in CombatDirector.instancesList)
-            {
-                director.monsterCardsSelection = null;
-            }
-            instance.RebuildCards();
-        }
-        void AddStormElites(Interactor interactor)
-        {
-            combatDirector!.enabled = true;
-            combatDirector.monsterCredit += monsterCredit;
-            var eDef = Assets.ContentPack.eliteDefs.Find("edStorm");
-            combatDirector.currentActiveEliteDef = eDef;
-            combatDirector.monsterSpawnTimer = 0f;
-        }
-        #endregion Storm Inst
-
-
-
-
-        private CombatDirector? combatDirector;
-        PostProcessVolume ppVolume;
-
-        float familyChanceBase;
-
-        public static bool stormActive = false;
-        public static StormEvent activeEvent;
-
-        [Tooltip("The credits spent on spawning a Storming Wave.")]
-        public float baseMonsterCredit;
-
-        [Tooltip("The StormEvent object activated when this shrine is used.")]
-        public StormEvent? stormEvent;
+        public static FamilyDirectorCardCategorySelection ActiveFamily; //the current Active Family 
     }
 }

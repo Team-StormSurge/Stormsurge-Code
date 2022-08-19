@@ -15,19 +15,28 @@ using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.Equipment.Elites
 {
+    /// <summary>
+    /// Behaviours for the Overlord's Descent, the Aspect of Storming Elites.
+    /// </summary>
     [HarmonyPatch]
     public class AffixStorm : EquipBase
     {
         protected override string equipDefName => "edAffixStorming";
         protected override string configName => "Storming Aspect";
 
+        //don't need to subscribe to any events, so this is empty for now
         public override void AddEquipBehavior(){ }
 
+        //TODO REPLACE THIS!! This doesn't work with headhunter effects, so we need to check for the buff instead
+        #region Add Affix Behaviours
+        //Harmony postfix to run after OnEquipmentGained- adds our Storm Affix Component if they picked up Overlord's Descent.
         [HarmonyPostfix, HarmonyPatch(typeof(CharacterBody), nameof(CharacterBody.OnEquipmentGained))]
         public static void EquipmentBehaviorPatch(CharacterBody __instance, EquipmentDef equipmentDef)
         {
-            if (equipmentDef != GetInstance<AffixStorm>()!.equipDef) return;
-            __instance.gameObject.AddComponent<StormAffixComponent>();
+            if (equipmentDef != GetInstance<AffixStorm>()!.equipDef) return; //skips this code if they did not pick up Overlord's Descent
+            __instance.gameObject.AddComponent<StormAffixComponent>(); //add our Storm Affix monobehaviour
+
+            //spawns a lightning strike VFX to signify Aspect pickup
             EffectManager.SpawnEffect(LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/LightningStrikeImpact"), new EffectData
             {
                 origin = __instance.gameObject.transform.position
@@ -35,43 +44,49 @@ namespace StormSurge.Equipment.Elites
 
         }
 
-
+        // Harmony postfix to run after OnEquipmentLost - removes our Storm Affix Component if they dropped Overlord's Descent.
         [HarmonyPostfix, HarmonyPatch(typeof(CharacterBody), nameof(CharacterBody.OnEquipmentLost))]
         public static void EquipmentLostPatch(CharacterBody __instance, EquipmentDef equipmentDef)
         {
-            if (equipmentDef != GetInstance<AffixStorm>()!.equipDef) return;
-            UnityEngine.Object.Destroy(__instance.gameObject.GetComponent<StormAffixComponent>());
+            if (equipmentDef != GetInstance<AffixStorm>()!.equipDef) return; //skips this code if we did not drop Overlord's Descent
+            UnityEngine.Object.Destroy(__instance.gameObject.GetComponent<StormAffixComponent>()); //destroys our Storm Affix monobehaviour
 
         }
+        #endregion Add Affix Behaviours
 
-        private static BuffDef _stuporBuff;
-        static BuffDef StuporBuff
-        {
-            get
-            {
-                _stuporBuff ??= Assets.ContentPack.buffDefs.Find("stupor");
-                return _stuporBuff;
-            }
-        }
+        static InstRef<BuffDef> StuporBuff = new(() => Assets.ContentPack.buffDefs.Find("bdStupor"));
+
+        // Harmony postfix for RecalculateStats- drains our stats if we're affected by the Stupor / Drowned debuff
         [HarmonyPostfix, HarmonyPatch(typeof(CharacterBody), nameof(CharacterBody.RecalculateStats))]
         public static void StuporBuffPatch(CharacterBody __instance)
         {
             if(__instance.HasBuff(StuporBuff))
             {
-                __instance.damage *= Mathf.Min((1 - (0.05f * __instance.GetBuffCount(StuporBuff))),0.7f);
+                // reduce damage dealt by debuff stack
+                __instance.damage *= Mathf.Min((1 - (0.05f * __instance.GetBuffCount(StuporBuff))),0.7f); 
+                // reduce sprinting speed by debuff stack
                 __instance.sprintingSpeedMultiplier *= Mathf.Min((1 - (0.05f * __instance.GetBuffCount(StuporBuff))),0.7f);
             }
         }
+
+        /// <summary>
+        /// The item behaviour placed on CharacterBodies using Overlord's Descent
+        /// </summary>
         public class StormAffixComponent : MonoBehaviour
         {
+            //the component used to search for missile targets
             private readonly BullseyeSearch search = new BullseyeSearch();
+
+            //the Buff Ward that inflicts Stupor / Drowning on nearby combatants
             public static InstRef<GameObject> stuporWard = new(() => Assets.AssetBundle.LoadAsset<GameObject>("StuporField.prefab"));
 
             public GameObject? stuporInstance;
+            //the timed method responsible for generating Storm missiles
             Coroutine? lightningRoutine;
+            //the refresh rate between Storm Missile firing
             float duration = 3;
             CharacterBody body;
-            void Start()
+            void Start() //instantiate our stored values
             {
                 body = GetComponent<CharacterBody>();
                 stuporInstance = Instantiate((GameObject) stuporWard, gameObject.transform);
@@ -79,9 +94,13 @@ namespace StormSurge.Equipment.Elites
                 //Debug.LogWarning($"STORMSURGE :: instantiated {stuporInstance}");
                 lightningRoutine = StartCoroutine(TickLightning(duration));
             }
-            void OnDestroy()
+            void OnDestroy() //remove this component and its Stupor Field once we're done with it
             {
                 Destroy(stuporInstance);
+            }
+            void OnDisable() //stop our lightning missiles if this component is disabled
+            {
+                StopCoroutine(lightningRoutine);
             }
             void FixedUpdate()
             {
@@ -96,7 +115,7 @@ namespace StormSurge.Equipment.Elites
                 }
             }
 
-            void FireBolt()
+            void FireBolt() // fire a missile if we have a target
             {
                 if(!target) return;
 
@@ -108,9 +127,9 @@ namespace StormSurge.Equipment.Elites
             }
             HurtBox? target;
             static GameObject _projectilePrefab;
-            static GameObject projectilePrefab => _projectilePrefab ??= Assets.AssetBundle.LoadAsset<GameObject>("StormMissile.prefab");
+            static InstRef<GameObject> projectilePrefab = new(() => Assets.AssetBundle.LoadAsset<GameObject>("StormMissile.prefab"));
 
-            void GenerateSearch()
+            void GenerateSearch() //finds the next target for our Storming Missiles
             {
                 search.teamMaskFilter = TeamMask.GetUnprotectedTeams(body.teamComponent.teamIndex);
                 search.filterByLoS = true;
@@ -128,7 +147,9 @@ namespace StormSurge.Equipment.Elites
             }
 
             bool canFire = true;
-            IEnumerator TickLightning(float duration)
+            // looping timer to determine when we can fire missiles
+            // this only runs if CanFire is false, so the timing never gets weird if we can't find a target (and end up waiting to reset our values)
+            IEnumerator TickLightning(float duration) 
             {
                 while(true)
                 {
@@ -141,45 +162,57 @@ namespace StormSurge.Equipment.Elites
 
     }
 
+    /// <summary>
+    /// The component that controls our Storm Missile movement
+    /// </summary>
     [RequireComponent(typeof(Rigidbody), typeof(QuaternionPID), typeof(TeamFilter))]
     [RequireComponent(typeof(ProjectileNetworkTransform), typeof(ProjectileImpactExplosion), typeof(ProjectileController))]
     public class StormMissile : MonoBehaviour
-        {
-        static GameObject _impactEffect;
-        static GameObject ImpactEffect => _impactEffect ??= LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/MissileExplosionVFX");
-        private void Awake()
+    {
+        static InstRef<GameObject> ImpactEffect = new(() => LegacyResourcesAPI.Load<GameObject>("Prefabs/Effects/ImpactEffects/MissileExplosionVFX"));
+        private void Awake() //only runs when this script is first loaded, for efficiency- not sure if hotloads to this prefab would work?
             {
-                if (!NetworkServer.active)
+                
+                if (!NetworkServer.active) //this script can only run on Server Authorative objects! clients use Ghosts instead
                 {
                     enabled = false;
                     return;
                 }
+                //initialises our missile values
                 transform = base.transform;
                 rigidbody = GetComponent<Rigidbody>();
                 torquePID = GetComponent<QuaternionPID>();
                 teamFilter = GetComponent<TeamFilter>();
                 projectileExplosion = GetComponent<ProjectileImpactExplosion>();
 
-            projectileExplosion.explosionEffect = ImpactEffect;
-            ImpactEffect.transform.localScale = projectileExplosion.blastRadius * Vector3.one;
+            projectileExplosion.explosionEffect = ImpactEffect; //sets the explosion effect our current loaded Impact prefab
+            ((GameObject) ImpactEffect).transform.localScale = projectileExplosion.blastRadius * Vector3.one; //scales the effect with our Blast Radius
             }
         void Start()
         {
-            targetPos = FindTarget();
+            targetPos = FindTarget(); //gets the target of our missile
         }
         private void FixedUpdate()
         {
             timer += Time.fixedDeltaTime;
-            rigidbody.velocity = transform.forward * maxVelocity;
-            if (Vector3.Distance(targetPos, Vector3.zero) > float.Epsilon && timer >= delayTimer)
+            /*
+             * currently these missiles always move at max velocity; we can add acceleration to them later, though, pretty easily
+             */
+            rigidbody.velocity = transform.forward * maxVelocity; 
+
+            if (Vector3.Distance(targetPos, Vector3.zero) > float.Epsilon && timer >= delayTimer) //runs if our delay has run out, and our target isn't 0.0.0
             {
+                //runs if our target is within the blast radius, with some margin for error
                 if (Vector3.Distance(transform.position, targetPos) < projectileExplosion.blastRadius * 0.9f)
                 {
-                    projectileExplosion.Detonate();
+                    projectileExplosion.Detonate(); //detonates our missile
                 }
-                rigidbody.velocity = transform.forward * (maxVelocity + timer * acceleration);
-                Vector3 vector = (targetPos + UnityEngine.Random.insideUnitSphere * turbulence - transform.position);
-                if (vector != Vector3.zero)
+                //... accelerates our missile past max once it finds a target? not sure what that's about...
+                rigidbody.velocity = transform.forward * (maxVelocity + timer * acceleration); 
+
+                //randomises our missile target; it jiggles around for some extra pizzazz
+                Vector3 vector = (targetPos + (UnityEngine.Random.insideUnitSphere * turbulence)) - transform.position;
+                if (vector != Vector3.zero) //only runs if we need to rotate
                 {
                     Quaternion rotation = transform.rotation;
                     Quaternion targetQuat = Util.QuaternionSafeLookRotation(vector);
@@ -188,12 +221,12 @@ namespace StormSurge.Equipment.Elites
                     rigidbody.angularVelocity = torquePID.UpdatePID();
                 }
             }
-            if (timer > deathTimer)
+            if (timer > deathTimer) //detonate if we run out of life!
             {
                 projectileExplosion.Detonate();
             }
         }
-        private Vector3 FindTarget()
+        private Vector3 FindTarget() //finds our current target
         {
             search.searchOrigin = transform.position;
             search.searchDirection = transform.forward;
@@ -210,10 +243,10 @@ namespace StormSurge.Equipment.Elites
 
 
 
-
-        private Vector3 targetPos;
-        private new Transform transform;
-        private Rigidbody rigidbody;
+            //all of our script's assorted values
+            private Vector3 targetPos;
+            private new Transform transform;
+            private Rigidbody rigidbody;
             private TeamFilter teamFilter;
             private ProjectileImpactExplosion projectileExplosion;
             public float maxVelocity;

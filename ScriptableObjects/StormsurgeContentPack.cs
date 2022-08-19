@@ -8,6 +8,9 @@ using UnityEngine;
 
 namespace StormSurge
 {
+    /// <summary>
+    /// The custom Content Pack that we use, in order to implement custom Expansions, Item Tiers, Void Conversions, etc.
+    /// </summary>
     [CreateAssetMenu(menuName = "Stormsurge/Content Pack Provider")]
     public class StormsurgeContentPack : SerializableContentPack
     {
@@ -17,7 +20,7 @@ namespace StormSurge
         public ItemRelationshipType[] itemRelationshipTypes = { };
         public ItemRelationshipProvider[] itemRelationshipProviders = { };
 
-        public override ContentPack CreateContentPack()
+        public override ContentPack CreateContentPack() // adds any of our custom content into the base content pack
         {
             var content = base.CreateContentPack();
             content.expansionDefs.Add(expansionDefs);

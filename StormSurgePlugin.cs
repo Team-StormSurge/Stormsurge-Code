@@ -41,6 +41,7 @@ namespace StormSurge
 			//initialise asset loading
 			Assets.Init(harmony);
 
+			//generates the patch processor for our TierDefProvider, then patches it in.
 			new PatchClassProcessor(harmony, typeof(TierDefProvider)).Patch();
 
 		}

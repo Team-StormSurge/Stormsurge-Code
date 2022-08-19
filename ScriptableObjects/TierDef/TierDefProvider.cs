@@ -6,33 +6,35 @@ using System.Text;
 using HarmonyLib;
 using StormSurge;
 using UnityEngine;
+using StormSurge.Utils.ReferenceHelper;
 
 namespace StormSurge.ScriptableObjects.TierDef
 {
+	/// <summary>
+	/// Implements our custom Item Tiers (currently Hunter only)
+	/// </summary>
 	[HarmonyPatch]
 	public class TierDefProvider
 	{
-		private static ItemTierDef _hunter;
+		public static InstRef<ItemTierDef> HunterTierDef = new(() => Assets.AssetBundle.LoadAsset<ItemTierDef>("HunterTier"));
 
-		public static ItemTierDef HunterTierDef
-		{
-			get
-			{
-				if (!_hunter) _hunter = Assets.AssetBundle.LoadAsset<ItemTierDef>("HunterTier");
-				return _hunter;
-			}
-		}
-
+		/// <summary>
+		/// initialises our TierDef provider and runs all pertinent code at patch-time.
+		/// </summary>
+		/// <param name="contentPack"></param>
 		public static void Init(StormsurgeContentPack contentPack)
 		{
 			AddNewColor();
 		}
 
+		/// <summary>
+		/// Adds custom colours into RoR's custom colour catalogue.
+		/// </summary>
 		public static void AddNewColor()
 		{
 			var len = ColorCatalog.indexToColor32.Length;
-			HunterTierDef.colorIndex = (ColorCatalog.ColorIndex) len;
-			HunterTierDef.darkColorIndex = (ColorCatalog.ColorIndex) len + 1;
+			((ItemTierDef) HunterTierDef).colorIndex	= (ColorCatalog.ColorIndex) len;
+			((ItemTierDef)HunterTierDef).darkColorIndex = (ColorCatalog.ColorIndex) len + 1;
 
 			var hunterLight = new Color32(223, 205, 255, 255);
 			var hunterDark = new Color32(88, 50, 86, 255);
@@ -43,6 +45,7 @@ namespace StormSurge.ScriptableObjects.TierDef
 				.AddItem(Util.RGBToHex(hunterDark)).ToArray();
 		}
 
+		//Harmony pre-fix for ColorCatalog.GetColor to work with our custom colours.
 		[HarmonyPrefix, HarmonyPatch(typeof(ColorCatalog), nameof(ColorCatalog.GetColor))]
 		public static bool PatchGetColor(ColorCatalog.ColorIndex colorIndex, ref Color32 __result)
 		{
@@ -52,6 +55,8 @@ namespace StormSurge.ScriptableObjects.TierDef
 			return false;
 		}
 
+
+		//Harmony pre-fix for ColorCatalog.GetColorHexString to work with our custom colours.
 		[HarmonyPrefix, HarmonyPatch(typeof(ColorCatalog), nameof(ColorCatalog.GetColorHexString))]
 		public static bool GetColorHexString(ColorCatalog.ColorIndex colorIndex, ref string __result)
 		{
